@@ -4,6 +4,7 @@ luac.out
 # luarocks build files
 *.src.rock
 *.zip
+*.vgadget
 *.tar.gz
 
 # Object files
@@ -39,3 +40,5 @@ luac.out
 *.x86_64
 *.hex
 
+.git
+.project

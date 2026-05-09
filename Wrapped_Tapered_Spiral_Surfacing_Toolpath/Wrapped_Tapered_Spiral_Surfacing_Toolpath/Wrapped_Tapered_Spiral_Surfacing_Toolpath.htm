@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Wrapped Tapered Spiral Surfacing Toolpath</title>
+<style type="text/css">
+html {
+    overflow: auto;
+}
+body {
+    background-color: #F0F0F0;
+}
+body, td, th {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75rem;
+}
+.FormButton {
+    font-weight: bold;
+    width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75rem;
+}
+.h1 {
+    font-size: 0.88rem;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+<table width="100%" border="0">
+  <tr>
+    <td colspan="3"><table width="100%" border="0">
+        <tr>
+          <td class="TitleText"><h1 style = "color: #2E2E30; font-size: 14pt;text-align: left" > <span id="GadgetTitle">Wrapped Tapered Spiral Surfacing Toolpath</span> </h1>
+            <hr size="1" width="100%"></td>
+        </tr>
+      </table></td>
+  </tr>
+  <tr>
+    <td colspan="3"> This gadget creates vectors which can be used to machine spirals along a 
+      column (rope or barley twist). Once the vectors have been created, use 
+      the 2D Profile Toolpath with the 'Machine Vectors .. On' form within the 
+      program to create the actual toolpaths at your required depths. </td>
+  </tr>
+  <tr>
+    <td colspan="3"><hr size="1" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><table width="100%" border="0">
+        <tr>
+          <td width = "60%"><table width="100%" border="0">
+              <tr>
+                <td colspan="4"><strong>Spiral Parameters</strong><br>
+                  <br></td>
+              </tr>
+              <tr>
+                <td colspan="3" align="center" ><img src="NumStarts.png" width="60" height="64" align="middle"> &nbsp;&nbsp;Number of Starts / Strands </td>
+                <td><input name="NumStarts" type="text" id="NumStarts" size="3" maxlength="3"></td>
+              </tr>
+              <tr>
+                <td colspan="4"><br>
+                  <b>Use Spiral Pitch or Spacing</b></td>
+              </tr>
+              <tr>
+                <td valign="center" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <label>
+                    <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
+                  </label></td>
+                <td>Spiral&nbsp;Pitch</td>
+                <td><img  src="SpiralPitch.png" width="80" height="67"></td>
+                <td><input name="StrandPitch" type="text" id="StrandPitch" size="5" maxlength="8">
+                  &nbsp;<span id="Units11">units</span></td>
+              </tr>
+              <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  <label>
+                    <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
+                  </label></td>
+                <td>Spacing between strands</td>
+                <td><img src="SpiralSpacing.png" width="80" height="54"></td>
+                <td><input name="StrandSpacing" type="text" id="StrandSpacing" size="5" maxlength="8">
+                  &nbsp;<span id="Units10">units</span></td>
+              </tr>
+              <tr>
+                <td colspan="2">Offset from Start</td>
+                <td><img src="StartGap.png" width="80" height="54"></td>
+                <td><input name="StrandStartOffset" type="text" id="StrandStartOffset" size="5" maxlength="8">
+                  &nbsp;<span id="Units12">units</span></td>
+              </tr>
+              <tr>
+                <td colspan="2">Offset from End</td>
+                <td><img src="EndGap.png" width="80" height="54"></td>
+                <td><input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
+                  &nbsp;<span id="Units13">units</span></td>
+              </tr>
+            </table></td>
+          <td>&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top"><table width="100%" border="0" align="top">
+              <tr>
+                <td colspan="2"><b>Twist Direction</b><br>
+                  <br></td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td colspan="2"><img src="RightTwistDirection.png" width="44" height="30" align="middle">
+                  <input type="checkbox" checked ID="CreateRightHandTwistCheck" value="active">
+                  Create Right Hand Twist </td>
+              </tr>
+              <tr>
+                <td><br></td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td colspan="2"><img src="LeftTwistDirection.png" width="44" height="30" align="middle">
+                  <input type="checkbox" checked ID="CreateLeftHandTwistCheck" value="active">
+                  Create Left Hand Twist </td>
+              </tr>
+              <tr>
+                <td colspan="2"><br>
+                  <hr></td>
+              </tr>
+              <tr>
+                <td colspan="2"><b>Coves</b><br>
+                  <br></td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td rowspan="2"><img src="Coves.png" width="80" height="54" align="left"></td>
+                <td><input type="checkbox" checked ID="CreateCoveAtStartCheck" value="active">
+                  Create Cove at Start</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td><input type="checkbox" checked ID="CreateCoveAtEndCheck" value="active">
+                  Create Cove at End</td>
+              </tr>
+            </table></td>
+        </tr>
+      </table></td>
+  </tr>
+  <tr>
+    <td colspan="3"><hr size="1" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><strong>Cylinder Dimensions </strong></td>
+  </tr>
+  <tr>
+    <td  align="center"><img src="CylinderDimensions.png" width="44" height="49"></td>
+    <td><table width="100%" border="0">
+        <tr>
+          <td width="35%">Cylinder Length (<b>L</b>)</td>
+          <td><span id="CylinderLength"></span>&nbsp; <span id="Units1">units</span></td>
+        </tr>
+        <tr>
+          <td>Cylinder Diameter (<b>D</b>)</td>
+          <td><span id="CylinderDiameter"></span>&nbsp; <span id="Units2">units</span></td>
+        </tr>
+      </table></td>
+  </tr>
+  <tr>
+    <td colspan="3"><hr size="1" width="100%" /></td>
+  </tr>
+  <tr>
+    <td colspan="3"><table width="100%" border="0">
+        <tr>
+          <td width="20%">&nbsp;</td>
+          <td width="20%"><input name="ButtonOK" type="button" class="FormButton" id="ButtonOK" value="OK"></td>
+          <td width="20%">&nbsp;</td>
+          <td width="20%"><input name="ButtonCancel" type="button" class="FormButton" id="ButtonCancel" value="Cancel"></td>
+          <td align="right" width="20%" valign="bottom" style="color: #999999; font-size: 0.62rem;" >Version <span id="GadgetVersion">0.0</span></td>
+        </tr>
+      </table></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,10 @@
+CHANGELOG
+=========
+
+1.0.0
+-----
+
+- Created safe renamed release package: Wrapped Tapered Spiral Surfacing Toolpath.
+- Preserved original gadget behavior for clone-validation phase.
+- Renamed top-level folder, Lua file, resource folder, HTML file, dialog title, registry key, and visible HTML title.
+- Added README, CHANGELOG, and LICENSE files.

@@ -1,0 +1,12 @@
+LICENSE / SOURCE NOTICE
+=======================
+
+This package is derived from Vectric's Wrapped Spiral Layout gadget source.
+
+The original Vectric gadget files state that permission is granted to use, alter, and redistribute the software, including for commercial applications, subject to restrictions including: do not misrepresent the original source, plainly mark altered source versions, and do not remove or alter the source notice.
+
+This package is plainly marked as an altered source version and retains the original notice in the Lua source file.
+
+Additional alteration note:
+
+Wrapped Tapered Spiral Surfacing Toolpath v1.0.0 is a renamed clone/release scaffold prepared for adding tapered spiral geometry. It is not represented as the original Vectric gadget.
