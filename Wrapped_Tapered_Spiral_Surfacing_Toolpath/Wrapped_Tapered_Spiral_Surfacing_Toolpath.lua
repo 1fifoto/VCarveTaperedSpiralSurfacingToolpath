@@ -47,6 +47,11 @@ g_cylinder_length = 48.0
 g_cylinder_diameter = 8.0
 g_cylinder_along_x = true
 
+-- Surfacing/taper parameters. A zero diameter means "default to the wrapped job diameter".
+g_start_diameter = 0.0
+g_end_diameter = 0.0
+g_angular_step_degrees = 2.0
+
 g_spiral_surfacing_toolpath_layer_name =  "Spiral Vectors"
 g_cove_surfacing_toolpath_layer_name   =  "Cove Vectors"
    
@@ -90,6 +95,10 @@ function GetUserChoices(job, script_path, load_default_values)
       g_cylinder_length   = registry:GetDouble("CylinderLength",   g_cylinder_length)
       g_cylinder_diameter = registry:GetDouble("CylinderDiameter", g_cylinder_diameter)
       g_cylinder_along_x  = registry:GetBool  ("CylinderAlongX",   g_cylinder_along_x)
+
+      g_start_diameter = registry:GetDouble("StartDiameter", g_start_diameter)
+      g_end_diameter   = registry:GetDouble("EndDiameter",   g_end_diameter)
+      g_angular_step_degrees = registry:GetDouble("AngularStepDegrees", g_angular_step_degrees)
       
       g_window_width       = registry:GetInt("WindowWidth",         g_window_width)
       g_window_height      = registry:GetInt("WindowHeight",        g_window_height)
@@ -111,6 +120,14 @@ function GetUserChoices(job, script_path, load_default_values)
      dims_from_job = true;
    else
      DisplayMessageBox("Current job is not a wrapped rotary job!");
+   end
+
+   if g_start_diameter <= 0.0 then
+      g_start_diameter = g_cylinder_diameter
+   end
+
+   if g_end_diameter <= 0.0 then
+      g_end_diameter = g_cylinder_diameter
    end
    
    -- display our dialog to get user choices
@@ -140,6 +157,8 @@ function GetUserChoices(job, script_path, load_default_values)
    dialog:AddLabelField("Units11", units_text)
    dialog:AddLabelField("Units12", units_text)
    dialog:AddLabelField("Units13", units_text)
+   dialog:AddLabelField("Units14", units_text)
+   dialog:AddLabelField("Units15", units_text)
    
    -- Spiral Parameters
    dialog:AddIntegerField("NumStarts",        g_num_starts)
@@ -156,6 +175,11 @@ function GetUserChoices(job, script_path, load_default_values)
    
    dialog:AddDoubleField("StrandStartOffset", g_offset_from_start)
    dialog:AddDoubleField("StrandEndOffset",   g_offset_from_end)
+
+   -- Surfacing/taper parameters
+   dialog:AddDoubleField("StartDiameter", g_start_diameter)
+   dialog:AddDoubleField("EndDiameter",   g_end_diameter)
+   dialog:AddDoubleField("AngularStepDegrees", g_angular_step_degrees)
 
    -- Twist Direction 
    dialog:AddCheckBox("CreateRightHandTwistCheck", g_create_right_twist)
@@ -195,6 +219,10 @@ function GetUserChoices(job, script_path, load_default_values)
    
    g_offset_from_start = dialog:GetDoubleField("StrandStartOffset")
    g_offset_from_end   = dialog:GetDoubleField("StrandEndOffset")
+
+   g_start_diameter = dialog:GetDoubleField("StartDiameter")
+   g_end_diameter   = dialog:GetDoubleField("EndDiameter")
+   g_angular_step_degrees = dialog:GetDoubleField("AngularStepDegrees")
 
    -- Twist Direction 
    g_create_right_twist = dialog:GetCheckBox("CreateRightHandTwistCheck")
@@ -236,6 +264,21 @@ function GetUserChoices(job, script_path, load_default_values)
       DisplayMessageBox("The cylinder diameter must be greater than 0.0")
       return -1
    end
+
+   if g_start_diameter <= 0.0 then
+      DisplayMessageBox("The start diameter must be greater than 0.0")
+      return -1
+   end
+
+   if g_end_diameter <= 0.0 then
+      DisplayMessageBox("The end diameter must be greater than 0.0")
+      return -1
+   end
+
+   if g_angular_step_degrees <= 0.0 or g_angular_step_degrees > 45.0 then
+      DisplayMessageBox("The angular step must be greater than 0.0 and no more than 45.0 degrees")
+      return -1
+   end
    
    if ((g_offset_from_start + g_offset_from_end) > g_cylinder_length) then
       DisplayMessageBox("The start and end offsets combined must not exceed the cylinder length")
@@ -258,6 +301,10 @@ function GetUserChoices(job, script_path, load_default_values)
    end   
    registry:SetDouble("OffsetFromStart", g_offset_from_start)
    registry:SetDouble("OffsetFromEnd",   g_offset_from_end)
+
+   registry:SetDouble("StartDiameter", g_start_diameter)
+   registry:SetDouble("EndDiameter",   g_end_diameter)
+   registry:SetDouble("AngularStepDegrees", g_angular_step_degrees)
    
    registry:SetBool("CreateRightTwist",  g_create_right_twist)
    registry:SetBool("CreateLeftTwist",   g_create_left_twist)

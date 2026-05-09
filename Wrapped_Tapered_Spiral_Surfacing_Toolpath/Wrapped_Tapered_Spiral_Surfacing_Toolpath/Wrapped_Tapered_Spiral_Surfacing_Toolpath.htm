@@ -39,10 +39,7 @@ body, td, th {
       </table></td>
   </tr>
   <tr>
-    <td colspan="3"> This gadget creates vectors which can be used to machine spirals along a 
-      column (rope or barley twist). Once the vectors have been created, use 
-      the 2D Profile Toolpath with the 'Machine Vectors .. On' form within the 
-      program to create the actual toolpaths at your required depths. </td>
+    <td colspan="3"> This gadget is being developed to create continuous wrapped spiral surfacing toolpaths for tapered rotary work. This first UI version preserves the original spiral-vector behavior while adding taper and sampling parameters for the upcoming surfacing implementation. </td>
   </tr>
   <tr>
     <td colspan="3"><hr size="1" width="100%" /></td>
@@ -95,6 +92,28 @@ body, td, th {
                 <td><input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
                   &nbsp;<span id="Units13">units</span></td>
               </tr>
+              <tr>
+                <td colspan="4"><br>
+                  <b>Tapered Surfacing Parameters</b></td>
+              </tr>
+              <tr>
+                <td colspan="2">Start Diameter</td>
+                <td>&nbsp;</td>
+                <td><input name="StartDiameter" type="text" id="StartDiameter" size="5" maxlength="8">
+                  &nbsp;<span id="Units14">units</span></td>
+              </tr>
+              <tr>
+                <td colspan="2">End Diameter</td>
+                <td>&nbsp;</td>
+                <td><input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
+                  &nbsp;<span id="Units15">units</span></td>
+              </tr>
+              <tr>
+                <td colspan="2">Angular Step</td>
+                <td>&nbsp;</td>
+                <td><input name="AngularStepDegrees" type="text" id="AngularStepDegrees" size="5" maxlength="8">
+                  &nbsp;degrees</td>
+              </tr>
             </table></td>
           <td>&nbsp;&nbsp;&nbsp;</td>
           <td valign="top"><table width="100%" border="0" align="top">
@@ -144,17 +163,17 @@ body, td, th {
     <td colspan="3"><hr size="1" width="100%" /></td>
   </tr>
   <tr>
-    <td colspan="2"><strong>Cylinder Dimensions </strong></td>
+    <td colspan="2"><strong>Wrapped Job Dimensions </strong></td>
   </tr>
   <tr>
     <td  align="center"><img src="CylinderDimensions.png" width="44" height="49"></td>
     <td><table width="100%" border="0">
         <tr>
-          <td width="35%">Cylinder Length (<b>L</b>)</td>
+          <td width="35%">Wrapped Job Length (<b>L</b>)</td>
           <td><span id="CylinderLength"></span>&nbsp; <span id="Units1">units</span></td>
         </tr>
         <tr>
-          <td>Cylinder Diameter (<b>D</b>)</td>
+          <td>Wrapped Job Diameter (<b>D</b>)</td>
           <td><span id="CylinderDiameter"></span>&nbsp; <span id="Units2">units</span></td>
         </tr>
       </table></td>
