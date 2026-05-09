@@ -40,5 +40,10 @@ luac.out
 *.x86_64
 *.hex
 
+dist/
+.DS_Store
+__MACOSX/
+._*
+
 .git
 .project

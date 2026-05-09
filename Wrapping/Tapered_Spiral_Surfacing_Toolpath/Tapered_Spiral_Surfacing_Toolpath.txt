@@ -1,0 +1,11 @@
+Tapered Spiral Surfacing Toolpath
+
+This gadget is an altered source version derived from Vectric's Wrapped Spiral Layout gadget.
+
+Current development status:
+- Installs under the Wrapping gadget group.
+- Adds UI fields for Start Diameter, End Diameter, and Angular Step.
+- Geometry/toolpath generation is still being developed.
+
+Install by using VCarve's Gadget installer with the generated .vgadget file, or manually copy
+the Wrapping/Tapered_Spiral_Surfacing_Toolpath folder into the Vectric Gadgets folder.

@@ -24,7 +24,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          GADGET_NAME="Wrapped_Tapered_Spiral_Surfacing_Toolpath"
+          GADGET_NAME="Tapered_Spiral_Surfacing_Toolpath"
+          PAYLOAD_ROOT="Wrapping"
 
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             VERSION="${GITHUB_REF_NAME}"
@@ -33,12 +34,15 @@ jobs:
           fi
 
           rm -rf dist
-          mkdir -p "dist/${GADGET_NAME}"
+          mkdir -p dist
 
-          cp -R "${GADGET_NAME}/." "dist/${GADGET_NAME}/"
+          test -f "${PAYLOAD_ROOT}/${GADGET_NAME}/${GADGET_NAME}.lua"
+          test -f "${PAYLOAD_ROOT}/${GADGET_NAME}/${GADGET_NAME}/${GADGET_NAME}.htm"
+
+          cp -R "${PAYLOAD_ROOT}" "dist/${PAYLOAD_ROOT}"
 
           cd dist
-          zip -r "${GADGET_NAME}_${VERSION}.zip" "${GADGET_NAME}"
+          zip -r "${GADGET_NAME}_${VERSION}.zip" "${PAYLOAD_ROOT}"
           cp "${GADGET_NAME}_${VERSION}.zip" "${GADGET_NAME}_${VERSION}.vgadget"
 
       - name: Upload artifacts

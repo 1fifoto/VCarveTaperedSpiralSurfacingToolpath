@@ -1,5 +1,5 @@
 -- VECTRIC LUA SCRIPT
--- ALTERED SOURCE VERSION: Wrapped Tapered Spiral Surfacing Toolpath release package.
+-- ALTERED SOURCE VERSION: Tapered Spiral Surfacing Toolpath release package.
 -- Derived from Vectric Wrapped Spiral Layout gadget; original source notice retained below.
 -- Copyright 2013 Vectric Ltd.
 
@@ -60,7 +60,7 @@ g_window_height = 750
 
 g_display_num_rotation = true   
 
-g_dialog_name = "Wrapped Tapered Spiral Surfacing Toolpath"
+g_dialog_name = "Tapered Spiral Surfacing Toolpath"
 
 g_version = "1.0.0"
 
@@ -74,7 +74,7 @@ g_version = "1.0.0"
 function GetUserChoices(job, script_path, load_default_values)
    
    -- get our default values from the registry (values used last time we were run)
-   local registry = Registry("WrappedTaperedSpiral")
+   local registry = Registry("TaperedSpiralSurfacingToolpath")
 
    -- ---------------- Get default values from last run -------------------
    if load_default_values then
@@ -131,7 +131,7 @@ function GetUserChoices(job, script_path, load_default_values)
    end
    
    -- display our dialog to get user choices
-   local html_path = "file:" .. script_path .. "\\Wrapped_Tapered_Spiral_Surfacing_Toolpath\\Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm"
+   local html_path = "file:" .. script_path .. "\\Tapered_Spiral_Surfacing_Toolpath\\Tapered_Spiral_Surfacing_Toolpath.htm"
    local dialog = HTML_Dialog(false, html_path, g_window_width, g_window_height, g_dialog_name)
 
    -- Gadget Version
