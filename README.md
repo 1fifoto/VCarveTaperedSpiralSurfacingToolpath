@@ -1,63 +1,76 @@
-# VCarve Tapered Spiral Gadget
+# VCarve Tapered Spiral Surfacing Toolpath
 
-Starter repository for a Vectric VCarve gadget named **Tapered Spiral Surfacing Toolpath**.
+Starter repository for a Vectric VCarve gadget named **Wrapped Tapered Spiral Surfacing Toolpath**.
 
-This repository currently contains a safely renamed scaffold based on the Vectric Spiral Layout gadget structure. It is intended to install separately from the original gadget. At this stage, it preserves the original wrapped spiral layout behavior and is ready for incremental development.
+This repository contains a renamed scaffold derived from the Vectric Wrapped Spiral Layout gadget structure. The current focus is evolving the gadget into a true tapered spiral surfacing toolpath generator for rotary CNC applications such as pool cue machining.
 
 ## Repository layout
 
 ```text
-Tapered_Spiral_Surfacing_Toolpath/
-  Tapered_Spiral_Surfacing_Toolpath.lua
-  Tapered_Spiral_Surfacing_Toolpath.txt
-  Tapered_Spiral_Surfacing_Toolpath/
-    Tapered_Spiral_Surfacing_Toolpath.htm
+Wrapped_Tapered_Spiral_Surfacing_Toolpath/
+  Wrapped_Tapered_Spiral_Surfacing_Toolpath.lua
+  Wrapped_Tapered_Spiral_Surfacing_Toolpath.txt
+  Wrapped_Tapered_Spiral_Surfacing_Toolpath/
+    Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm
     *.png
-    vr.gif
-.github/
-  workflows/
-    build-gadget.yml
 ```
 
 ## Manual installation
 
-Copy the `Tapered_Spiral_Surfacing_Toolpath` folder into your Vectric Gadgets folder, then restart VCarve.
+Install using:
+
+```text
+Gadgets → Install Gadget
+```
+
+and select the generated `.vgadget` file.
+
+Alternatively, manually copy:
+
+```text
+Wrapped_Tapered_Spiral_Surfacing_Toolpath/
+```
+
+into the Vectric Gadgets directory.
 
 Typical location:
 
 ```text
-Public Documents\Vectric\VCarve Pro\Gadgets\
+C:\Users\Public\Documents\Vectric Files\Gadgets\
 ```
 
 ## Automated packaging
 
-The GitHub Actions workflow builds both:
+GitHub Actions automatically builds:
 
 ```text
-Tapered_Spiral_Surfacing_Toolpath_<version>.zip
-Tapered_Spiral_Surfacing_Toolpath_<version>.vgadget
+Wrapped_Tapered_Spiral_Surfacing_Toolpath_<version>.zip
+Wrapped_Tapered_Spiral_Surfacing_Toolpath_<version>.vgadget
 ```
 
 On ordinary pushes, these are uploaded as workflow artifacts.
 
-On version tags such as `v1.0.0`, the workflow also creates a GitHub Release and attaches both files.
-
-## Development note
-
-The immediate next development step is to add editable start and end diameter fields to the UI, then replace the current straight-line spiral geometry with sampled tapered/conical spiral geometry.
-
-
-## Vectric install location
-
-The packaged gadget payload is intentionally rooted under:
+On version tags such as:
 
 ```text
-Wrapping/
-  Tapered_Spiral_Surfacing_Toolpath/
-    Tapered_Spiral_Surfacing_Toolpath.lua
-    Tapered_Spiral_Surfacing_Toolpath/
-      Tapered_Spiral_Surfacing_Toolpath.htm
-      *.png
+v1.0.0
 ```
 
-This mirrors the built-in Vectric wrapping gadgets so the gadget appears under the Wrapping group as **Tapered Spiral Surfacing Toolpath**.
+the workflow also creates a GitHub Release and attaches both files.
+
+## Current development status
+
+Current implemented work:
+- Renamed standalone gadget scaffold
+- Automated GitHub Actions packaging
+- `.vgadget` generation
+- Start Diameter UI field
+- End Diameter UI field
+- Angular Step UI field
+
+Current in-progress work:
+- Continuous tapered spiral geometry generation
+- True surfacing toolpath generation
+- ExternalToolpath integration
+- Rotary spiral surfacing strategy
+- Pool cue taper machining support
