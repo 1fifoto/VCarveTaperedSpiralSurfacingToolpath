@@ -131,7 +131,7 @@ function GetUserChoices(job, script_path, load_default_values)
    end
    
    -- display our dialog to get user choices
-   local html_path = "file:" .. script_path .. "\\Tapered_Spiral_Surfacing_Toolpath\\Tapered_Spiral_Surfacing_Toolpath.htm"
+   local html_path = "file:" .. script_path .. "\\Wrapped_Tapered_Spiral_Surfacing_Toolpath\\Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm"
    local dialog = HTML_Dialog(false, html_path, g_window_width, g_window_height, g_dialog_name)
 
    -- Gadget Version
@@ -325,51 +325,134 @@ function GetUserChoices(job, script_path, load_default_values)
    return 1
 end
 
+
+--[[ ---------- Clamp01 -----------------------------
+|
+| Clamp value to [0, 1]
+|
+]]
+function Clamp01(value)
+   if value < 0.0 then
+      return 0.0
+   end
+   if value > 1.0 then
+      return 1.0
+   end
+   return value
+end
+
+--[[ ---------- RadiusAtX -----------------------------
+|
+| Linear taper radius at position x measured from 0 to taper_length.
+|
+]]
+function RadiusAtX(x, taper_length, start_diameter, end_diameter)
+   local safe_len = math.max(taper_length, 0.000001)
+   local t = Clamp01(x / safe_len)
+   local diameter = start_diameter + ((end_diameter - start_diameter) * t)
+   return diameter * 0.5
+end
+
+--[[ ---------- AngleAtX -----------------------------
+|
+| Return cumulative angle in degrees for given axial distance x.
+| Spiral pitch is axial advance per revolution.
+|
+]]
+function AngleAtX(x, spiral_pitch, start_angle_degrees)
+   local revolutions = x / spiral_pitch
+   return start_angle_degrees + (revolutions * 360.0)
+end
+
+--[[ ---------- WrappedYAtX -----------------------------
+|
+| Convert angle to wrapped Y coordinate by using local circumference.
+|
+]]
+function WrappedYAtX(angle_degrees, radius)
+   local circumference = 2.0 * math.pi * radius
+   local wraps = angle_degrees / 360.0
+   return wraps * circumference
+end
+
+--[[ ---------- SampleTaperedSpiral -----------------------------
+|
+| Build sampled points for a wrapped tapered spiral preview.
+|
+]]
+function SampleTaperedSpiral(start_x, end_x, start_angle_degrees, pitch, start_diameter, end_diameter, angular_step_degrees)
+   local points = {}
+   local travel = end_x - start_x
+   local direction = 1.0
+   if travel < 0.0 then
+      direction = -1.0
+      travel = -travel
+   end
+
+   local total_angle = (travel / pitch) * 360.0
+   local segment_count = math.max(1, math.ceil(math.abs(total_angle) / angular_step_degrees))
+
+   for i = 0, segment_count do
+      local t = i / segment_count
+      local x = start_x + (direction * travel * t)
+      local local_x = travel * t
+      local radius = RadiusAtX(local_x, travel, start_diameter, end_diameter)
+      local angle = AngleAtX(local_x, pitch, start_angle_degrees)
+      local y = WrappedYAtX(angle, radius)
+      points[#points + 1] = { x = x, y = y }
+   end
+
+   return points
+end
+
 --[[ ---------- CreateSingleSpiral -----------------------------
 |
 | Create a single spiral with passed parameters
 |
 ]]
-function CreateSingleSpiral(job, along_x, cyl_dia, cyl_length, start_angle, start_offset, end_offset, line_angle, right_hand)
+function CreateSingleSpiral(job, along_x, cyl_length, start_angle, start_offset, end_offset, right_hand)
 
-   local line = Contour(0.0);     -- use default tolerance
+   local line = Contour(0.0)
+   local start_axis = start_offset
+   local end_axis = cyl_length - end_offset
 
-   local circum = cyl_dia * math.pi
-   local start_ratio = start_angle / 360.0;
-   
-   local start_x
-   local start_y
-   local end_x
-   local end_y
-   local line_ang_rad = math.rad(line_angle)
-   
-   if along_x then
-      start_x = job.MinX + start_offset
-      start_y = job.MinY + (circum * start_ratio)
-      end_x   = job.MinX + cyl_length - end_offset
-      end_y   = start_y + ((end_x - start_x) * math.tan(line_ang_rad))
-      if right_hand then
-         start_y = -start_y
-         end_y   = -end_y
+   local sampled_points = SampleTaperedSpiral(
+      start_axis,
+      end_axis,
+      start_angle,
+      g_spiral_pitch,
+      g_start_diameter,
+      g_end_diameter,
+      g_angular_step_degrees
+   )
+
+   for index, sample in ipairs(sampled_points) do
+      local x
+      local y
+      if along_x then
+         x = job.MinX + sample.x
+         y = job.MinY + sample.y
+         if right_hand then
+            y = -y
+         end
+      else
+         x = job.MinX + sample.y
+         y = job.MinY + sample.x
+         if not right_hand then
+            x = -x
+         end
       end
-   else
-      start_x = job.MinX + (circum * start_ratio)
-      start_y = job.MinY + start_offset
-      end_y   = job.MinY + cyl_length - end_offset
-      end_x   = start_x + ((end_y - start_y) * math.tan(line_ang_rad))
-      if not right_hand then
-         start_x = -start_x
-         end_x   = -end_x
+
+      if index == 1 then
+         line:AppendPoint(x, y)
+      else
+         line:LineTo(x, y)
       end
    end
-   
-   line:AppendPoint(start_x, start_y)
-   line:LineTo(end_x, end_y)
 
    return line
+end
 
-   end
- 
 
 --[[ ------------- DrawSpirals -----------------------------------
 |
@@ -383,7 +466,6 @@ function DrawSpirals(job, right_hand, offset_start_angle)
 
    local step_angle = 360.0 / g_num_starts
    local cur_angle = 0.0  
-   local circumference = g_cylinder_diameter *  math.pi
    
    local num_revolutions = 0
    
@@ -391,39 +473,20 @@ function DrawSpirals(job, right_hand, offset_start_angle)
       cur_angle = step_angle * 0.5
    end
    
-   local spiral_angle = 0.0
-   
-   if g_num_starts > 0 then
-      if g_use_spiral_pitch then
-         spiral_angle =  90 - math.deg(math.atan2(g_spiral_pitch, circumference * 0.5))
-      else
-         local circumference_section = circumference / g_num_starts
-         if (circumference_section <= g_spiral_spacing) then
-            local max_starts = math.floor(circumference / g_spiral_spacing)
-            DisplayMessageBox("ERROR\r\n\r\nIt is impossible to fit " .. g_num_starts .. " strands with " .. g_spiral_spacing .. " spacing " ..
-                              "on a cylinder of " ..  g_cylinder_diameter .." diameter.\r\n\r\n" ..
-                              "The maximum number of strands with the current spacing is " .. max_starts
-                              )
-            return 0
-         end
-         local alpha = math.asin(g_spiral_spacing / circumference_section )
-         spiral_angle = 90.0 - math.deg(alpha);
-         
-      end   
+   if not g_use_spiral_pitch then
+      DisplayMessageBox("Tapered spiral preview currently requires Spiral Pitch mode. Please select Spiral Pitch.")
+      return 0
    end
-   
-   
+
    for n = 1, g_num_starts do
    
       local contour = CreateSingleSpiral(
                                          job, 
                                          g_cylinder_along_x,
-                                         g_cylinder_diameter,
                                          g_cylinder_length,
                                          cur_angle,
                                          g_offset_from_start,
                                          g_offset_from_end,
-                                         spiral_angle,
                                          right_hand
                                          )
       
@@ -456,8 +519,7 @@ function DrawSpirals(job, right_hand, offset_start_angle)
   
    -- calculate number of revolutions
    local base_len = g_cylinder_length - g_offset_from_start - g_offset_from_end
-   local wrap_len = base_len * math.tan(math.rad(spiral_angle))
-   num_revolutions = wrap_len / circumference
+   num_revolutions = base_len / g_spiral_pitch
       
    return num_revolutions
    

@@ -8,4 +8,4 @@ Current development status:
 - Geometry/toolpath generation is still being developed.
 
 Install by using VCarve's Gadget installer with the generated .vgadget file, or manually copy
-the Wrapping/Tapered_Spiral_Surfacing_Toolpath folder into the Vectric Gadgets folder.
+the Wrapping/Wrapped_Tapered_Spiral_Surfacing_Toolpath folder into the Vectric Gadgets folder.
