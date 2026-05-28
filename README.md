@@ -65,7 +65,7 @@ To build a local gadget package and copy it to the shared NAS mounted on macOS:
 scripts/build-vgadget.sh
 ```
 
-By default, the script copies the `.vgadget` file to:
+By default, the script copies the `.vgadget` file and Windows uninstall helper to:
 
 ```text
 /Volumes/Shared Data/Projects/Design-and-Making/PConklin
@@ -77,7 +77,17 @@ To copy to a different folder, pass the destination path:
 scripts/build-vgadget.sh "/Volumes/Shared Data/Projects/Design-and-Making/PConklin"
 ```
 
-The script writes the local package to `dist/` and copies the `.vgadget` file to the NAS destination when it exists.
+The script writes the local package to `dist/` and copies the `.vgadget` file plus `uninstall-windows-gadget.bat` to the NAS destination when it exists.
+
+## Windows uninstall helper
+
+Before installing a fresh gadget build in VCarve, close VCarve and run this helper on Windows:
+
+```text
+uninstall-windows-gadget.bat
+```
+
+The local packaging script copies this helper to the PConklin NAS directory so it can be run from Windows. It removes only the installed VCarve Pro Trial Edition V12.5 gadget folder.
 
 ## Current development status
 
