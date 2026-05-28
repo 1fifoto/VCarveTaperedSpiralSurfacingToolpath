@@ -55,7 +55,29 @@ On version tags such as:
 v1.0.0
 ```
 
-the workflow also creates a GitHub Release and attaches both files.
+the workflow also creates a GitHub Release and attaches the `.vgadget` file.
+
+## Local NAS packaging
+
+To build a local gadget package and copy it to the shared NAS mounted on macOS:
+
+```text
+scripts/build-vgadget.sh
+```
+
+By default, the script copies the `.vgadget` file to:
+
+```text
+/Volumes/Shared Data/Projects/Design-and-Making/PConklin
+```
+
+To copy to a different folder, pass the destination path:
+
+```text
+scripts/build-vgadget.sh "/Volumes/Shared Data/Projects/Design-and-Making/PConklin"
+```
+
+The script writes the local package to `dist/` and copies the `.vgadget` file to the NAS destination when it exists.
 
 ## Current development status
 
