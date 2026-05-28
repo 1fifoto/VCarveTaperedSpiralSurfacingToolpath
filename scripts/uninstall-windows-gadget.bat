@@ -19,7 +19,6 @@ if "%FOUND%"=="0" (
   echo Done. You can now install the latest .vgadget from the NAS.
 )
 echo.
-pause
 exit /b
 
 :RemoveIfExists

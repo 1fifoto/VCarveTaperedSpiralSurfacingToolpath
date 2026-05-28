@@ -3,7 +3,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Wrapped Tapered Spiral Surfacing Toolpath</title>
+<title>Create Tapered Rounding Toolpath</title>
 <style type="text/css">
 html {
     overflow: auto;
@@ -21,11 +21,29 @@ body, td, th {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 0.75rem;
 }
-.h1 {
-    font-size: 0.88rem;
-    font-weight: bold;
+.ToolNameLabel {
+    border: 1px solid #B0B0B0;
+    background-color: #FFFFFF;
 }
 </style>
+<script type="text/javascript">
+function setDefaultToolpathName(name) {
+    var field = document.getElementById("ToolpathName");
+    if (!field) {
+        return;
+    }
+    var current = field.value;
+    if (
+        current === "" ||
+        current === "Tapered Spiral" ||
+        current === "Tapered Radial" ||
+        current === "Tapered Raster" ||
+        current === "Tapered Optimized Raster"
+    ) {
+        field.value = name;
+    }
+}
+</script>
 </head>
 
 <body>
@@ -33,13 +51,17 @@ body, td, th {
   <tr>
     <td colspan="3"><table width="100%" border="0">
         <tr>
-          <td class="TitleText"><h1 style = "color: #2E2E30; font-size: 14pt;text-align: left" > <span id="GadgetTitle">Wrapped Tapered Spiral Surfacing Toolpath</span> </h1>
+          <td class="TitleText"><h1 style = "color: #2E2E30; font-size: 14pt;text-align: left" > <span id="GadgetTitle">Create Tapered Rounding Toolpath</span> </h1>
             <hr size="1" width="100%"></td>
         </tr>
       </table></td>
   </tr>
   <tr>
-    <td colspan="3"> This gadget is being developed to create continuous wrapped spiral surfacing toolpaths for tapered rotary work. This version previews sampled wrapped tapered spiral vectors. For this tapered preview phase, use Spiral Pitch mode (axial advance per revolution). </td>
+    <td colspan="3"> This gadget creates a toolpath to taper a square or cylindrical blank to a truncated cone.<br>
+      <br>
+      <b>NOTE:</b> When post-processing, if the output is generated with the "Z Zero Position On Cylinder"
+      set to "Surface of Cylinder", the surface will be the surface of the FINISHED cylinder. For rounding
+      operations "Center of Cylinder" is a much safer choice. </td>
   </tr>
   <tr>
     <td colspan="3"><hr size="1" width="100%" /></td>
@@ -47,113 +69,96 @@ body, td, th {
   <tr>
     <td colspan="3"><table width="100%" border="0">
         <tr>
-          <td width = "60%"><table width="100%" border="0">
+          <td colspan="3" width="100%"><table width="100%" border="0">
               <tr>
-                <td colspan="4"><strong>Spiral Parameters</strong><br>
-                  <br></td>
+                <td colspan="2"><strong>Blank Size and Shape</strong><br></td>
               </tr>
               <tr>
-                <td colspan="3" align="center" ><img src="NumStarts.png" width="60" height="64" align="middle"> &nbsp;&nbsp;Number of Starts / Strands </td>
-                <td><input name="NumStarts" type="text" id="NumStarts" size="3" maxlength="3"></td>
-              </tr>
-              <tr>
-                <td colspan="4"><br>
-                  <b>Use Spiral Pitch or Spacing</b></td>
-              </tr>
-              <tr>
-                <td valign="center" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <label>
-                    <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
-                  </label></td>
-                <td>Spiral&nbsp;Pitch</td>
-                <td><img  src="SpiralPitch.png" width="80" height="67"></td>
-                <td><input name="StrandPitch" type="text" id="StrandPitch" size="5" maxlength="8">
+                <td align="left"><input type="radio" name="BlankShapeOptionGroup" value="radio">
+                  <img src="SquareSize.png" width="60" height="54" align="middle"> Size of square blank&nbsp;&nbsp;
+                  <input name="BlankSquareSize" type="text" id="BlankSquareSize" size="5" maxlength="8">
+                  &nbsp;<span id="Units10">units</span></td>
+                <td align="left" valign="center"><input type="radio" name="BlankShapeOptionGroup" value="radio">
+                  <img src="RoundSize.png" width="60" height="54" align="middle"> Diameter of round blank&nbsp;&nbsp;
+                  <input name="BlankDiameter" type="text" id="BlankDiameter" size="5" maxlength="8">
                   &nbsp;<span id="Units11">units</span></td>
               </tr>
               <tr>
-                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <label>
-                    <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
-                  </label></td>
-                <td>Spacing between strands</td>
-                <td><img src="SpiralSpacing.png" width="80" height="54"></td>
-                <td><input name="StrandSpacing" type="text" id="StrandSpacing" size="5" maxlength="8">
-                  &nbsp;<span id="Units10">units</span></td>
-              </tr>
-              <tr>
-                <td colspan="2">Offset from Start</td>
-                <td><img src="StartGap.png" width="80" height="54"></td>
-                <td><input name="StrandStartOffset" type="text" id="StrandStartOffset" size="5" maxlength="8">
-                  &nbsp;<span id="Units12">units</span></td>
-              </tr>
-              <tr>
-                <td colspan="2">Offset from End</td>
-                <td><img src="EndGap.png" width="80" height="54"></td>
-                <td><input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
-                  &nbsp;<span id="Units13">units</span></td>
-              </tr>
-              <tr>
-                <td colspan="4"><br>
-                  <b>Tapered Surfacing Parameters</b></td>
-              </tr>
-              <tr>
-                <td colspan="2">Start Diameter</td>
-                <td>&nbsp;</td>
-                <td><input name="StartDiameter" type="text" id="StartDiameter" size="5" maxlength="8">
-                  &nbsp;<span id="Units14">units</span></td>
-              </tr>
-              <tr>
-                <td colspan="2">End Diameter</td>
-                <td>&nbsp;</td>
-                <td><input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
-                  &nbsp;<span id="Units15">units</span></td>
-              </tr>
-              <tr>
-                <td colspan="2">Angular Step (degrees)</td>
-                <td>&nbsp;</td>
-                <td><input name="AngularStepDegrees" type="text" id="AngularStepDegrees" size="5" maxlength="8">
-                  &nbsp;degrees</td>
+                <td width="50%"><table width="100%" border="0">
+                    <tr>
+                      <td colspan="2"><br>
+                        <b>Machining Method</b></td>
+                    </tr>
+                    <tr>
+                      <td width="60px"><img src="WrappedSpiral.png" width="60" height="53" align="middle"></td>
+                      <td><label>
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Spiral')">
+                          Spiral (continuous rotary pass)</label></td>
+                    </tr>
+                    <tr>
+                      <td><img src="Toolpath_Radial.png" width="60" height="53" align="middle"></td>
+                      <td><label>
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Radial')">
+                          Radial (around cylinder) </label></td>
+                    </tr>
+                    <tr>
+                      <td><img src="Toolpath_Linear.png" width="60" height="53" align="middle"></td>
+                      <td><label>
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Raster')">
+                          Raster (along cylinder)</label></td>
+                    </tr>
+                    <tr>
+                      <td><img src="Toolpath_Square.png" width="60" height="53" align="middle"></td>
+                      <td><label>
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Optimized Raster')">
+                          Optimized Raster (along cylinder)<br>
+                          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;square blank only</label></td>
+                    </tr>
+                  </table></td>
+                <td valign="top"><table width="100%" border="0">
+                    <tr>
+                      <td colspan="3"><br>
+                        <strong>Allowance</strong><br></td>
+                    </tr>
+                    <tr>
+                      <td align="left"><img src="Allowance.png" width="60" height="54" align="middle"></td>
+                      <td width="50%"> Amount of material to leave&nbsp;&nbsp; </td>
+                      <td><input name="Allowance" type="text" id="Allowance" size="5" maxlength="8">
+                        &nbsp;<span id="Units12">units</span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="3"><br>
+                        <strong>Taper Dimensions</strong><br></td>
+                    </tr>
+                    <tr>
+                      <td rowspan="2" align="center"><img src="TaperDimensions.png" width="120" height="90" align="middle"></td>
+                      <td>Start Diameter</td>
+                      <td><input name="StartDiameter" type="text" id="StartDiameter" size="5" maxlength="8">
+                        &nbsp;<span id="Units13">units</span></td>
+                    </tr>
+                    <tr>
+                      <td>End Diameter</td>
+                      <td><input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
+                        &nbsp;<span id="Units14">units</span></td>
+                    </tr>
+                  </table></td>
               </tr>
             </table></td>
-          <td>&nbsp;&nbsp;&nbsp;</td>
-          <td valign="top"><table width="100%" border="0" align="top">
+        </tr>
+        <tr>
+          <td colspan="3"><hr size="1" width="100%" />
+            <strong><br>
+            Tool:</strong> - Select tool to machine with, this also sets stepover and stepdown</td>
+        </tr>
+        <tr>
+          <td colspan="3"><table width="100%" border="0">
               <tr>
-                <td colspan="2"><b>Twist Direction</b><br>
-                  <br></td>
+                <td height="30" width="99%" align="left" class="ToolNameLabel">&nbsp;&nbsp; <span id="ToolNameLabel">Tool</span></td>
+                <td align="right"><input type="button" name="ToolChooseButton" id="ToolChooseButton" value="Select ..." class="ToolPicker"></td>
               </tr>
               <tr>
-                <td>&nbsp;</td>
-                <td colspan="2"><img src="RightTwistDirection.png" width="44" height="30" align="middle">
-                  <input type="checkbox" checked ID="CreateRightHandTwistCheck" value="active">
-                  Create Right Hand Twist </td>
-              </tr>
-              <tr>
-                <td><br></td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td colspan="2"><img src="LeftTwistDirection.png" width="44" height="30" align="middle">
-                  <input type="checkbox" checked ID="CreateLeftHandTwistCheck" value="active">
-                  Create Left Hand Twist </td>
-              </tr>
-              <tr>
-                <td colspan="2"><br>
-                  <hr></td>
-              </tr>
-              <tr>
-                <td colspan="2"><b>Coves</b><br>
-                  <br></td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td rowspan="2"><img src="Coves.png" width="80" height="54" align="left"></td>
-                <td><input type="checkbox" checked ID="CreateCoveAtStartCheck" value="active">
-                  Create Cove at Start</td>
-              </tr>
-              <tr>
-                <td>&nbsp;</td>
-                <td><input type="checkbox" checked ID="CreateCoveAtEndCheck" value="active">
-                  Create Cove at End</td>
+                <td colspan="4"><b>Toolpath Name</b>&nbsp;&nbsp;&nbsp;&nbsp;
+                  <input name="ToolpathName" type="text" id="ToolpathName" size="30"></td>
               </tr>
             </table></td>
         </tr>
@@ -163,17 +168,17 @@ body, td, th {
     <td colspan="3"><hr size="1" width="100%" /></td>
   </tr>
   <tr>
-    <td colspan="2"><strong>Wrapped Job Dimensions </strong></td>
+    <td colspan="2"><strong>Cylinder Dimensions </strong></td>
   </tr>
   <tr>
-    <td  align="center"><img src="CylinderDimensions.png" width="44" height="49"></td>
+    <td align="center"><img src="CylinderDimensions.png" width="44" height="49"></td>
     <td><table width="100%" border="0">
         <tr>
-          <td width="35%">Wrapped Job Length (<b>L</b>)</td>
+          <td width="35%">Cylinder Length (<b>L</b>)</td>
           <td><span id="CylinderLength"></span>&nbsp; <span id="Units1">units</span></td>
         </tr>
         <tr>
-          <td>Wrapped Job Diameter (<b>D</b>)</td>
+          <td>Cylinder Diameter (<b>D</b>)</td>
           <td><span id="CylinderDiameter"></span>&nbsp; <span id="Units2">units</span></td>
         </tr>
       </table></td>
@@ -188,7 +193,7 @@ body, td, th {
           <td width="20%"><input name="ButtonOK" type="button" class="FormButton" id="ButtonOK" value="OK"></td>
           <td width="20%">&nbsp;</td>
           <td width="20%"><input name="ButtonCancel" type="button" class="FormButton" id="ButtonCancel" value="Cancel"></td>
-          <td align="right" width="20%" valign="bottom" style="color: #999999; font-size: 0.62rem;" >Version <span id="GadgetVersion">0.0</span></td>
+          <td align="right" width="20%" valign="bottom" style="color: #999999; font-size: 0.62rem;">Version <span id="GadgetVersion">0.0</span></td>
         </tr>
       </table></td>
   </tr>

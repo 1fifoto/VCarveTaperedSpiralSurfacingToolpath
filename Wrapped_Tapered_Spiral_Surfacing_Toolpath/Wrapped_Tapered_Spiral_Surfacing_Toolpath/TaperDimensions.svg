@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="120" viewBox="0 0 160 120">
+  <defs>
+    <marker id="arrow" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#eef3f5"/>
+    </marker>
+  </defs>
+
+  <image href="TaperDimensionsBase.png" x="0" y="0" width="160" height="120"/>
+
+  <!-- Thicker visible cone edge/tangent lines from the screenshot. -->
+  <path d="M45 47 L131 16" fill="none" stroke="#cfd6da" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+  <path d="M74 112 L148 51" fill="none" stroke="#cfd6da" stroke-width="2.2" stroke-linecap="round" opacity="0.88"/>
+  <path d="M128 14 C139 16 148 30 146 47" fill="none" stroke="#cfd6da" stroke-width="2.0" stroke-linecap="round" opacity="0.9"/>
+  <path d="M13 51 C16 35 27 22 43 19" fill="none" stroke="#cfd6da" stroke-width="2.0" stroke-linecap="round" opacity="0.9"/>
+  <path d="M23 91 C35 111 58 118 76 109" fill="none" stroke="#cfd6da" stroke-width="2.0" stroke-linecap="round" opacity="0.85"/>
+
+  <!-- Diameter leader lines across the actual front and back ellipses. -->
+  <line x1="28" y1="42" x2="74" y2="112" stroke="#f4f7f8" stroke-width="2.5" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+  <line x1="124" y1="15" x2="145" y2="52" stroke="#f4f7f8" stroke-width="2.2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+</svg>

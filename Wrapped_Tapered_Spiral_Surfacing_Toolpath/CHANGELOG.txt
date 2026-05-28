@@ -9,6 +9,13 @@ Unreleased
 - Renamed top-level folder, Lua file, resource folder, HTML file, dialog title, registry key, and visible HTML title.
 - Added README, CHANGELOG, and LICENSE files.
 - Added Start Diameter, End Diameter, and Angular Step UI fields.
+- Updated default taper inputs: 1 strand, 1.25 start diameter, 1.0425 end diameter, 0.0625 strand spacing, and zero start/end offsets.
+- Updated the gadget registry key so new defaults are not overridden by prior saved test values.
+- Started replacing the strand-based preview UI with rounding-style blank, pass, tool, and machining method controls, including a Spiral method option.
+- Defined Spiral method spacing as the selected tool stepover/toolpath width.
+- Renamed the visible dialog toward Create Tapered Rounding Toolpath while retaining start and end finished taper diameters.
+- Simplified the UI to one pass per run, one tool, editable toolpath name, Spiral-first machining methods, and Allowance above finished taper dimensions.
+- Updated the UI description/note, renamed Taper Dimensions, and set the default allowance to 0.0.
 
 2026-05-18
 - Added pure geometry helpers for tapered spiral sampling (RadiusAtX, AngleAtX, WrappedYAtX, SampleTaperedSpiral).

@@ -29,38 +29,27 @@ require "strict"
 
 -- Default values for variables
 
-g_num_starts = 4
-g_spiral_spacing = 1.0
-g_spiral_pitch = 1.0
-g_use_spiral_pitch = true
-g_offset_from_start = 1
-g_offset_from_end = 1
-
-g_create_right_twist = true
-g_create_left_twist = false
-
-g_create_cove_at_start = false
-g_create_cove_at_end = false
-
+g_blank_is_square = true
+g_blank_diameter = 1.25
+g_blank_square_size = 1.25
+g_allowance = 0.0
+g_machining_method = 1 -- 1 = spiral, 2 = radial, 3 = raster, 4 = optimized raster
 
 g_cylinder_length = 48.0
 g_cylinder_diameter = 8.0
 g_cylinder_along_x = true
 
--- Surfacing/taper parameters. A zero diameter means "default to the wrapped job diameter".
-g_start_diameter = 0.0
-g_end_diameter = 0.0
-g_angular_step_degrees = 2.0
-
-g_spiral_surfacing_toolpath_layer_name =  "Spiral Vectors"
-g_cove_surfacing_toolpath_layer_name   =  "Cove Vectors"
+g_start_diameter = 1.25
+g_end_diameter = 1.0425
    
-g_window_width = 700
-g_window_height = 750
+g_window_width = 740
+g_window_height = 800
 
-g_display_num_rotation = true   
+g_default_tool_id = ToolDBId()
+g_tool = nil
+g_toolpath_name = "Tapered Spiral"
 
-g_dialog_name = "Tapered Spiral Surfacing Toolpath"
+g_dialog_name = "Create Tapered Rounding Toolpath"
 
 g_version = "1.0.0"
 
@@ -74,23 +63,17 @@ g_version = "1.0.0"
 function GetUserChoices(job, script_path, load_default_values)
    
    -- get our default values from the registry (values used last time we were run)
-   local registry = Registry("TaperedSpiralSurfacingToolpath")
+   local registry = Registry("TaperedSpiralSurfacingToolpathV3")
 
    -- ---------------- Get default values from last run -------------------
    if load_default_values then
-      g_num_starts        = registry:GetInt   ("NumStarts",   g_num_starts)
-      g_spiral_pitch      = registry:GetDouble("SpiralPitch",      g_spiral_pitch)
-      g_spiral_spacing    = registry:GetDouble("SpiralSpacing",    g_spiral_spacing)
-      g_use_spiral_pitch  = registry:GetBool  ("UseSpiralPitch",   g_use_spiral_pitch)
-
-      g_create_right_twist = registry:GetBool("CreateRightTwist",  g_create_right_twist)
-      g_create_left_twist  = registry:GetBool("CreateLeftTwist",   g_create_left_twist)
-      
-      g_offset_from_start = registry:GetDouble("OffsetFromStart",  g_offset_from_start)
-      g_offset_from_end   = registry:GetDouble("OffsetFromEnd",    g_offset_from_end)
-
-      g_create_cove_at_start = registry:GetBool("CreateCoveAtStart",  g_create_cove_at_start)
-      g_create_cove_at_end   = registry:GetBool("CreateCoveAtEnd",    g_create_cove_at_end)
+      g_blank_is_square    = registry:GetBool  ("BlankIsSquare",   g_blank_is_square)
+      g_blank_diameter     = registry:GetDouble("BlankDiameter",   g_blank_diameter)
+      g_blank_square_size  = registry:GetDouble("BlankSquareSize", g_blank_square_size)
+      g_allowance          = registry:GetDouble("Allowance",       g_allowance)
+      g_machining_method   = registry:GetInt   ("MachiningMethod", g_machining_method)
+      g_toolpath_name      = registry:GetString("ToolpathName",    BuildToolpathName(g_machining_method))
+      g_default_tool_id:LoadDefaults("TaperedRoundingToolpath", "")
       
       g_cylinder_length   = registry:GetDouble("CylinderLength",   g_cylinder_length)
       g_cylinder_diameter = registry:GetDouble("CylinderDiameter", g_cylinder_diameter)
@@ -98,7 +81,6 @@ function GetUserChoices(job, script_path, load_default_values)
 
       g_start_diameter = registry:GetDouble("StartDiameter", g_start_diameter)
       g_end_diameter   = registry:GetDouble("EndDiameter",   g_end_diameter)
-      g_angular_step_degrees = registry:GetDouble("AngularStepDegrees", g_angular_step_degrees)
       
       g_window_width       = registry:GetInt("WindowWidth",         g_window_width)
       g_window_height      = registry:GetInt("WindowHeight",        g_window_height)
@@ -158,36 +140,27 @@ function GetUserChoices(job, script_path, load_default_values)
    dialog:AddLabelField("Units12", units_text)
    dialog:AddLabelField("Units13", units_text)
    dialog:AddLabelField("Units14", units_text)
-   dialog:AddLabelField("Units15", units_text)
-   
-   -- Spiral Parameters
-   dialog:AddIntegerField("NumStarts",        g_num_starts)
-   
-   local spiral_spacing_index = 2
-   if g_use_spiral_pitch then
-      spiral_spacing_index = 1
+
+   local blank_shape_index = 1
+   if not g_blank_is_square then
+      blank_shape_index = 2
    end
-   dialog:AddRadioGroup("SpiralSpacingOptionGroup", spiral_spacing_index)   
+   dialog:AddRadioGroup("BlankShapeOptionGroup", blank_shape_index)
+   dialog:AddDoubleField("BlankSquareSize", g_blank_square_size)
+   dialog:AddDoubleField("BlankDiameter", g_blank_diameter)
+   dialog:AddDoubleField("Allowance", g_allowance)
 
-   
-   dialog:AddDoubleField("StrandSpacing",     g_spiral_spacing)
-   dialog:AddDoubleField("StrandPitch",       g_spiral_pitch)
-   
-   dialog:AddDoubleField("StrandStartOffset", g_offset_from_start)
-   dialog:AddDoubleField("StrandEndOffset",   g_offset_from_end)
+   dialog:AddRadioGroup("MachiningMethodOptionGroup", g_machining_method)
 
-   -- Surfacing/taper parameters
+   dialog:AddLabelField("ToolNameLabel", "No tool selected")
+   dialog:AddToolPicker("ToolChooseButton", "ToolNameLabel", g_default_tool_id)
+   dialog:AddToolPickerValidToolType("ToolChooseButton", Tool.BALL_NOSE)
+   dialog:AddToolPickerValidToolType("ToolChooseButton", Tool.END_MILL)
+   dialog:AddToolPickerValidToolType("ToolChooseButton", Tool.RADIUSED_END_MILL)
+   dialog:AddTextField("ToolpathName", g_toolpath_name)
+
    dialog:AddDoubleField("StartDiameter", g_start_diameter)
    dialog:AddDoubleField("EndDiameter",   g_end_diameter)
-   dialog:AddDoubleField("AngularStepDegrees", g_angular_step_degrees)
-
-   -- Twist Direction 
-   dialog:AddCheckBox("CreateRightHandTwistCheck", g_create_right_twist)
-   dialog:AddCheckBox("CreateLeftHandTwistCheck",  g_create_left_twist)
-
-   -- Coves
-   dialog:AddCheckBox("CreateCoveAtStartCheck", g_create_cove_at_start)
-   dialog:AddCheckBox("CreateCoveAtEndCheck",   g_create_cove_at_end)
    
    -- Cylinder Dimensions - read only
    dialog:AddLabelField("CylinderLength",    tostring(g_cylinder_length))
@@ -205,60 +178,58 @@ function GetUserChoices(job, script_path, load_default_values)
 
    -- if we reach here, user pressed OK on form - get values
 
-   -- Spiral Parameters
-   g_num_starts        = dialog:GetIntegerField("NumStarts")
-   g_spiral_spacing    = dialog:GetDoubleField("StrandSpacing")
-   g_spiral_pitch      = dialog:GetDoubleField("StrandPitch")
+   local blank_shape_index = dialog:GetRadioIndex("BlankShapeOptionGroup")
+   g_blank_is_square = blank_shape_index == 1
+   g_blank_square_size = dialog:GetDoubleField("BlankSquareSize")
+   g_blank_diameter = dialog:GetDoubleField("BlankDiameter")
+   g_allowance = dialog:GetDoubleField("Allowance")
+   g_machining_method = dialog:GetRadioIndex("MachiningMethodOptionGroup")
 
-   spiral_spacing_index = dialog:GetRadioIndex("SpiralSpacingOptionGroup")   
-   if spiral_spacing_index == 1 then
-      g_use_spiral_pitch = true
-   else
-      g_use_spiral_pitch = false
-   end   
-   
-   g_offset_from_start = dialog:GetDoubleField("StrandStartOffset")
-   g_offset_from_end   = dialog:GetDoubleField("StrandEndOffset")
-
-   g_start_diameter = dialog:GetDoubleField("StartDiameter")
-   g_end_diameter   = dialog:GetDoubleField("EndDiameter")
-   g_angular_step_degrees = dialog:GetDoubleField("AngularStepDegrees")
-
-   -- Twist Direction 
-   g_create_right_twist = dialog:GetCheckBox("CreateRightHandTwistCheck")
-   g_create_left_twist  = dialog:GetCheckBox("CreateLeftHandTwistCheck")
-
-   -- Coves
-   g_create_cove_at_start = dialog:GetCheckBox("CreateCoveAtStartCheck")
-   g_create_cove_at_end   = dialog:GetCheckBox("CreateCoveAtEndCheck")
-   
-   -- Do some error checking
-   if g_num_starts < 1 then
-      DisplayMessageBox("The Number of starts must be greater than 0")
+   if g_machining_method < 1 or g_machining_method > 4 then
+      DisplayMessageBox("Unknown machining method selected")
       return -1
    end
 
-   if g_use_spiral_pitch then
-      if g_spiral_pitch <= 0.0 then
-         DisplayMessageBox("The spiral pitch must be greater than 0.0")
-         return -1
-      end
-   else
-      if g_spiral_spacing <= 0.0 then
-         DisplayMessageBox("The spacing between strands must be greater than 0.0")
-         return -1
-      end
+   if (not g_blank_is_square) and g_machining_method == 4 then
+      DisplayMessageBox("Optimized Raster strategy is not valid for round blanks - defaulting to Raster")
+      g_machining_method = 3
    end
+
+   g_start_diameter = dialog:GetDoubleField("StartDiameter")
+   g_end_diameter   = dialog:GetDoubleField("EndDiameter")
+   g_toolpath_name = dialog:GetTextField("ToolpathName")
    
+   -- Do some error checking
    if g_cylinder_length <= 0.0 then
       DisplayMessageBox("The cylinder length must be greater than 0.0")
       return -1
    end
 
-   if g_spiral_spacing <= 0.0 then
-      DisplayMessageBox("The spacing between strands must be greater than 0.0")
+   if g_blank_is_square and g_blank_square_size <= 0.0 then
+      DisplayMessageBox("The square blank size must be greater than 0.0")
       return -1
    end
+
+   if (not g_blank_is_square) and g_blank_diameter <= 0.0 then
+      DisplayMessageBox("The round blank diameter must be greater than 0.0")
+      return -1
+   end
+
+   if g_allowance < 0.0 then
+      DisplayMessageBox("The allowance must be zero or greater")
+      return -1
+   end
+
+   g_tool = dialog:GetTool("ToolChooseButton")
+   if g_tool == nil then
+      DisplayMessageBox("No tool selected!")
+      return -1
+   end
+   if string.len(g_toolpath_name) < 1 then
+      DisplayMessageBox("A name must be entered for the toolpath")
+      return -1
+   end
+   g_default_tool_id = g_tool.ToolDBId
 
    if g_cylinder_diameter <= 0.0 then
       DisplayMessageBox("The cylinder diameter must be greater than 0.0")
@@ -274,43 +245,18 @@ function GetUserChoices(job, script_path, load_default_values)
       DisplayMessageBox("The end diameter must be greater than 0.0")
       return -1
    end
-
-   if g_angular_step_degrees <= 0.0 or g_angular_step_degrees > 45.0 then
-      DisplayMessageBox("The angular step must be greater than 0.0 and no more than 45.0 degrees")
-      return -1
-   end
-   
-   if ((g_offset_from_start + g_offset_from_end) > g_cylinder_length) then
-      DisplayMessageBox("The start and end offsets combined must not exceed the cylinder length")
-      return -1
-   end
-   
-   if (not g_create_right_twist) and (not g_create_left_twist) then
-      DisplayMessageBox("You must create either a left or right twist or both")
-      return -1
-   end
    
    -- save job settings as default for next time ....
-   registry:SetInt("NumStarts",     g_num_starts)
-   
-   registry:SetBool  ("UseSpiralPitch",   g_use_spiral_pitch)
-   if g_use_spiral_pitch then
-      registry:SetDouble("SpiralPitch",   g_spiral_pitch)
-   else   
-      registry:SetDouble("SpiralSpacing", g_spiral_spacing)
-   end   
-   registry:SetDouble("OffsetFromStart", g_offset_from_start)
-   registry:SetDouble("OffsetFromEnd",   g_offset_from_end)
+   registry:SetBool  ("BlankIsSquare",     g_blank_is_square)
+   registry:SetDouble("BlankSquareSize",   g_blank_square_size)
+   registry:SetDouble("BlankDiameter",     g_blank_diameter)
+   registry:SetDouble("Allowance",         g_allowance)
+   registry:SetInt   ("MachiningMethod",   g_machining_method)
+   registry:SetString("ToolpathName",      g_toolpath_name)
+   g_default_tool_id:SaveDefaults("TaperedRoundingToolpath", "")
 
    registry:SetDouble("StartDiameter", g_start_diameter)
    registry:SetDouble("EndDiameter",   g_end_diameter)
-   registry:SetDouble("AngularStepDegrees", g_angular_step_degrees)
-   
-   registry:SetBool("CreateRightTwist",  g_create_right_twist)
-   registry:SetBool("CreateLeftTwist",   g_create_left_twist)
-
-   registry:SetBool("CreateCoveAtStart",  g_create_cove_at_start)
-   registry:SetBool("CreateCoveAtEnd",    g_create_cove_at_end)
 
    registry:SetInt("WindowWidth",         g_window_width)
    registry:SetInt("WindowHeight",        g_window_height)
@@ -325,297 +271,50 @@ function GetUserChoices(job, script_path, load_default_values)
    return 1
 end
 
+function BuildToolpathName(machining_method)
+   if machining_method == 1 then
+      return "Tapered Spiral"
+   end
+   if machining_method == 2 then
+      return "Tapered Radial"
+   end
+   if machining_method == 3 then
+      return "Tapered Raster"
+   end
+   if machining_method == 4 then
+      return "Tapered Optimized Raster"
+   end
+   return "Tapered Toolpath"
+end
 
---[[ ---------- Clamp01 -----------------------------
+--[[ ---------- CreateTaperedSurfacingToolpaths -----------------------------
 |
-| Clamp value to [0, 1]
+| Placeholder for the next implementation pass. The dialog and tool selection
+| are now wired, but actual ExternalToolpath generation still needs to be added.
 |
 ]]
-function Clamp01(value)
-   if value < 0.0 then
+function GetToolpathWidthFromTool(tool, job)
+   if tool == nil then
       return 0.0
    end
-   if value > 1.0 then
-      return 1.0
-   end
-   return value
+
+   return tool:ConvertValueToUnits(tool.Stepover, job.InMM)
 end
 
---[[ ---------- RadiusAtX -----------------------------
-|
-| Linear taper radius at position x measured from 0 to taper_length.
-|
-]]
-function RadiusAtX(x, taper_length, start_diameter, end_diameter)
-   local safe_len = math.max(taper_length, 0.000001)
-   local t = Clamp01(x / safe_len)
-   local diameter = start_diameter + ((end_diameter - start_diameter) * t)
-   return diameter * 0.5
-end
+function CreateTaperedSurfacingToolpaths(job)
+   local toolpath_width = GetToolpathWidthFromTool(g_tool, job)
 
---[[ ---------- AngleAtX -----------------------------
-|
-| Return cumulative angle in degrees for given axial distance x.
-| Spiral pitch is axial advance per revolution.
-|
-]]
-function AngleAtX(x, spiral_pitch, start_angle_degrees)
-   local revolutions = x / spiral_pitch
-   return start_angle_degrees + (revolutions * 360.0)
-end
-
---[[ ---------- WrappedYAtX -----------------------------
-|
-| Convert angle to wrapped Y coordinate by using local circumference.
-|
-]]
-function WrappedYAtX(angle_degrees, radius)
-   local circumference = 2.0 * math.pi * radius
-   local wraps = angle_degrees / 360.0
-   return wraps * circumference
-end
-
---[[ ---------- SampleTaperedSpiral -----------------------------
-|
-| Build sampled points for a wrapped tapered spiral preview.
-|
-]]
-function SampleTaperedSpiral(start_x, end_x, start_angle_degrees, pitch, start_diameter, end_diameter, angular_step_degrees)
-   local points = {}
-   local travel = end_x - start_x
-   local direction = 1.0
-   if travel < 0.0 then
-      direction = -1.0
-      travel = -travel
-   end
-
-   local total_angle = (travel / pitch) * 360.0
-   local segment_count = math.max(1, math.ceil(math.abs(total_angle) / angular_step_degrees))
-
-   for i = 0, segment_count do
-      local t = i / segment_count
-      local x = start_x + (direction * travel * t)
-      local local_x = travel * t
-      local radius = RadiusAtX(local_x, travel, start_diameter, end_diameter)
-      local angle = AngleAtX(local_x, pitch, start_angle_degrees)
-      local y = WrappedYAtX(angle, radius)
-      points[#points + 1] = { x = x, y = y }
-   end
-
-   return points
-end
-
---[[ ---------- CreateSingleSpiral -----------------------------
-|
-| Create a single spiral with passed parameters
-|
-]]
-function CreateSingleSpiral(job, along_x, cyl_length, start_angle, start_offset, end_offset, right_hand)
-
-   local line = Contour(0.0)
-   local start_axis = start_offset
-   local end_axis = cyl_length - end_offset
-
-   local sampled_points = SampleTaperedSpiral(
-      start_axis,
-      end_axis,
-      start_angle,
-      g_spiral_pitch,
-      g_start_diameter,
-      g_end_diameter,
-      g_angular_step_degrees
-   )
-
-   for index, sample in ipairs(sampled_points) do
-      local x
-      local y
-      if along_x then
-         x = job.MinX + sample.x
-         y = job.MinY + sample.y
-         if right_hand then
-            y = -y
-         end
-      else
-         x = job.MinX + sample.y
-         y = job.MinY + sample.x
-         if not right_hand then
-            x = -x
-         end
-      end
-
-      if index == 1 then
-         line:AppendPoint(x, y)
-      else
-         line:LineTo(x, y)
+   local message = "Tapered rounding toolpath creation is not implemented yet.\n\nThe dialog now captures blank, allowance, machining method, finished taper, and tool selection. Next step is generating the ExternalToolpath."
+   if g_machining_method == 1 then
+      message = message .. "\n\nSpiral spacing will be derived from the selected tool stepover."
+      if toolpath_width > 0.0 then
+         message = message .. "\nSpiral spacing: " .. toolpath_width
       end
    end
+   message = message .. "\n\nToolpath name: " .. g_toolpath_name
 
-   return line
-end
-
-
---[[ ------------- DrawSpirals -----------------------------------
-|
-|  Draw vectors representing spirals on a new layer - returns
-|  number of rotations
-|
-]]
-function DrawSpirals(job, right_hand, offset_start_angle)
-
-   local spiral_group = ContourGroup(true)  -- this will own contours in it
-
-   local step_angle = 360.0 / g_num_starts
-   local cur_angle = 0.0  
-   
-   local num_revolutions = 0
-   
-   if offset_start_angle then
-      cur_angle = step_angle * 0.5
-   end
-   
-   if not g_use_spiral_pitch then
-      DisplayMessageBox("Tapered spiral preview currently requires Spiral Pitch mode. Please select Spiral Pitch.")
-      return 0
-   end
-
-   for n = 1, g_num_starts do
-   
-      local contour = CreateSingleSpiral(
-                                         job, 
-                                         g_cylinder_along_x,
-                                         g_cylinder_length,
-                                         cur_angle,
-                                         g_offset_from_start,
-                                         g_offset_from_end,
-                                         right_hand
-                                         )
-      
-      -- add it to the spiral group
-      spiral_group:AddTail(contour)
-
-      cur_angle = cur_angle + step_angle
-      
-      end
-   
-   -- save the current layer as we don't want user drawign on our new 'construction' layer
-   local cur_layer = job.LayerManager:GetActiveLayer()
-
-   --  create a CadObject to represent the  group
-   local cad_object = CreateCadGroup(spiral_group);
-   
-   
-   -- create a layer with name if it doesnt already exist
-   local layer = job.LayerManager:GetLayerWithName(g_spiral_surfacing_toolpath_layer_name)
-
-   -- and add our object to it - on active sheet
-   layer:AddObject(cad_object, true)
-
-   -- lock the layer ?
-   layer.Locked = false
-   layer.Colour = 13158600  -- C8C8C8
-      
-   -- restore original active layer   
-   job.LayerManager:SetActiveLayer(cur_layer)
-  
-   -- calculate number of revolutions
-   local base_len = g_cylinder_length - g_offset_from_start - g_offset_from_end
-   num_revolutions = base_len / g_spiral_pitch
-      
-   return num_revolutions
-   
-end
-
---[[ ---------- CreateSingleCove -----------------------------
-|
-| Create a single cove with passed parameters
-|
-]]
-function CreateSingleCove(job, along_x, cyl_dia, offset_from_start)
-
-   local line = Contour(0.0);     -- use default tolerance
-
-   local circum = cyl_dia * math.pi
-   
-   local start_x
-   local start_y
-   local end_x
-   local end_y
-   
-   if along_x then
-      start_x = job.MinX + offset_from_start
-      start_y = job.MinY
-      end_x   = job.MinX + offset_from_start
-      end_y   = job.MinY + circum
-   else
-      start_x = job.MinX 
-      start_y = job.MinY + offset_from_start
-      end_x   = job.MinX + circum
-      end_y   = job.MinY + offset_from_start
-   end
-   
-   line:AppendPoint(start_x, start_y)
-   line:LineTo(end_x, end_y)
-
-   return line
-
-   end
-
-   
---[[ ------------- DrawCoves -----------------------------------
-|
-|  Draw vectors representing coves on a new layer 
-|
-]]
-function DrawCoves(job, do_start, do_end)
-
-   if (not do_start) and (not do_end) then
-      return
-   end
-   
-   local cove_group = ContourGroup(true)  -- this will own contours in it
-
-   
-      -- save the current layer as we don't want user drawign on our new 'construction' layer
-   local cur_layer = job.LayerManager:GetActiveLayer()
-
-   
-   -- now add our lines
-   if do_start then
-      local contour = CreateSingleCove(
-                                      job,
-                                      g_cylinder_along_x,
-                                      g_cylinder_diameter,
-                                      g_offset_from_start
-                                      )
-      cove_group:AddTail(contour)
-   end
-   
-   if do_end then
-      local contour = CreateSingleCove(
-                                      job,
-                                      g_cylinder_along_x,
-                                      g_cylinder_diameter,
-                                      g_cylinder_length - g_offset_from_end
-                                      )
-      cove_group:AddTail(contour)
-   end
-   
-   --  create a CadObject to represent the  group
-   local cad_object = CreateCadGroup(cove_group);
-   
-   -- create a layer with name if it doesnt already exist
-   local layer = job.LayerManager:GetLayerWithName(g_cove_surfacing_toolpath_layer_name)
-
-   -- and add our object to it - on active sheet
-   layer:AddObject(cad_object, true)
-
-   -- lock the layer ?
-   layer.Locked = false
-   layer.Colour = 13158600  -- C8C8C8
-      
-   -- restore original active layer   
-   job.LayerManager:SetActiveLayer(cur_layer)
-
+   DisplayMessageBox(message)
+   return true
 end
 
 
@@ -650,29 +349,14 @@ function main(script_path)
       end   
    end
      
-   -- now draw our vectors to use for spirals
-   
-   -- if we are creating a crossed spiral offset the starts for the second spiral
-   local offset_start_angle = g_create_right_twist and g_create_left_twist
-   
-   local num_revolutions = 0;
-   if g_create_right_twist then
-      num_revolutions = DrawSpirals(job, true, false)
+   local job_params = job.JobParameters
+   if job_params ~= nil then
+      job_params:SetBool("luaWrappedCylinderAlongXAxis", g_cylinder_along_x)
+   else
+      DisplayMessageBox("Failed to get parameters for job")
    end
 
-   if g_create_left_twist then
-      num_revolutions =DrawSpirals(job, false, offset_start_angle)
-   end
-   
-   if num_revolutions > 0 then   
-      if g_create_cove_at_start or g_create_cove_at_end then
-        DrawCoves(job, g_create_cove_at_start, g_create_cove_at_end)
-      end
-   end   
-   -- do we want to tell user number of rotations for spirals?
-   if g_display_num_rotation then
-      DisplayMessageBox("Total number of revolutions for spiral = " .. num_revolutions)
-   end
+   CreateTaperedSurfacingToolpaths(job)
    
    -- Make sure job shows any data we may have drawn    
    job:Refresh2DView()
