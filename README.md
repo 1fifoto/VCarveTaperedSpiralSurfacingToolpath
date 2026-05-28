@@ -44,7 +44,6 @@ C:\Users\Public\Documents\Vectric Files\Gadgets\
 GitHub Actions automatically builds:
 
 ```text
-Wrapped_Tapered_Spiral_Surfacing_Toolpath_<version>.zip
 Wrapped_Tapered_Spiral_Surfacing_Toolpath_<version>.vgadget
 ```
 

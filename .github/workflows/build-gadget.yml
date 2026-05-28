@@ -20,7 +20,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Build ZIP and VGadget
+      - name: Build VGadget
         shell: bash
         run: |
           set -euo pipefail
@@ -42,15 +42,13 @@ jobs:
           cp -R "${GADGET_NAME}/." "dist/${GADGET_NAME}/"
 
           cd dist
-          zip -r "${GADGET_NAME}_${VERSION}.zip" "${GADGET_NAME}"
-          cp "${GADGET_NAME}_${VERSION}.zip" "${GADGET_NAME}_${VERSION}.vgadget"
+          zip -r "${GADGET_NAME}_${VERSION}.vgadget" "${GADGET_NAME}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: gadget-files
           path: |
-            dist/*.zip
             dist/*.vgadget
 
       - name: Create GitHub Release
@@ -60,7 +58,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${GITHUB_REF_NAME}" \
-            dist/*.zip \
             dist/*.vgadget \
             --title "${GITHUB_REF_NAME}" \
             --notes "Automated gadget release for ${GITHUB_REF_NAME}"
