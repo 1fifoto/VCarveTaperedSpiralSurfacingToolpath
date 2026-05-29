@@ -43,6 +43,35 @@ function setDefaultToolpathName(name) {
         field.value = name;
     }
 }
+
+function updateAngularStepState() {
+    var methods = document.getElementsByName("MachiningMethodOptionGroup");
+    var angularStep = document.getElementById("AngularStep");
+    var label = document.getElementById("AngularStepLabel");
+    var units = document.getElementById("AngularStepUnits");
+    var spiralSelected = false;
+
+    if (!angularStep || !methods) {
+        return;
+    }
+
+    if (methods.length > 0) {
+        spiralSelected = methods[0].checked;
+    }
+
+    angularStep.disabled = !spiralSelected;
+    angularStep.style.backgroundColor = spiralSelected ? "#FFFFFF" : "#E0E0E0";
+    angularStep.style.color = spiralSelected ? "#000000" : "#777777";
+
+    if (label) {
+        label.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (units) {
+        units.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+}
+
+window.onload = updateAngularStepState;
 </script>
 </head>
 
@@ -76,7 +105,7 @@ function setDefaultToolpathName(name) {
               <tr>
                 <td align="left"><input type="radio" name="BlankShapeOptionGroup" value="radio">
                   <img src="SquareSize.png" width="60" height="54" align="middle"> Size of square blank&nbsp;&nbsp;
-                  <input name="BlankSquareSize" type="text" id="BlankSquareSize" size="5" maxlength="8">
+                  <input name="SquareSideLength" type="text" id="SquareSideLength" size="5" maxlength="8">
                   &nbsp;<span id="Units10">units</span></td>
                 <td align="left" valign="center"><input type="radio" name="BlankShapeOptionGroup" value="radio">
                   <img src="RoundSize.png" width="60" height="54" align="middle"> Diameter of round blank&nbsp;&nbsp;
@@ -92,25 +121,25 @@ function setDefaultToolpathName(name) {
                     <tr>
                       <td width="60px"><img src="WrappedSpiral.png" width="60" height="53" align="middle"></td>
                       <td><label>
-                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Spiral')">
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Spiral'); updateAngularStepState()">
                           Spiral (continuous rotary pass)</label></td>
                     </tr>
                     <tr>
                       <td><img src="Toolpath_Radial.png" width="60" height="53" align="middle"></td>
                       <td><label>
-                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Radial')">
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Radial'); updateAngularStepState()">
                           Radial (around cylinder) </label></td>
                     </tr>
                     <tr>
                       <td><img src="Toolpath_Linear.png" width="60" height="53" align="middle"></td>
                       <td><label>
-                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Raster')">
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Raster'); updateAngularStepState()">
                           Raster (along cylinder)</label></td>
                     </tr>
                     <tr>
                       <td><img src="Toolpath_Square.png" width="60" height="53" align="middle"></td>
                       <td><label>
-                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Optimized Raster')">
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Optimized Raster'); updateAngularStepState()">
                           Optimized Raster (along cylinder)<br>
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;square blank only</label></td>
                     </tr>
@@ -140,6 +169,11 @@ function setDefaultToolpathName(name) {
                       <td>End Diameter</td>
                       <td><input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
                         &nbsp;<span id="Units14">units</span></td>
+                    </tr>
+                    <tr>
+                      <td><span id="AngularStepLabel">Angular Step</span></td>
+                      <td><input name="AngularStep" type="text" id="AngularStep" size="5" maxlength="8">
+                        &nbsp;<span id="AngularStepUnits">degrees</span></td>
                     </tr>
                   </table></td>
               </tr>

@@ -12,7 +12,7 @@ DESTINATION="${1:-${NAS_DEST:-${DEFAULT_DESTINATION}}}"
 cd "${REPO_ROOT}"
 
 test -f "${GADGET_NAME}/${GADGET_NAME}.lua"
-test -f "${GADGET_NAME}/${GADGET_NAME}/${GADGET_NAME}.htm"
+test -f "${GADGET_NAME}/${GADGET_NAME}.htm"
 test -f "${UNINSTALL_SCRIPT}"
 
 rm -rf "dist/${GADGET_NAME}"

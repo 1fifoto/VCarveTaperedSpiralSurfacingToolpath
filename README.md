@@ -10,9 +10,9 @@ This repository contains a renamed scaffold derived from the Vectric Wrapped Spi
 Wrapped_Tapered_Spiral_Surfacing_Toolpath/
   Wrapped_Tapered_Spiral_Surfacing_Toolpath.lua
   Wrapped_Tapered_Spiral_Surfacing_Toolpath.txt
-  Wrapped_Tapered_Spiral_Surfacing_Toolpath/
-    Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm
-    *.png
+  Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm
+  *.png
+  *.gif
 ```
 
 ## Manual installation

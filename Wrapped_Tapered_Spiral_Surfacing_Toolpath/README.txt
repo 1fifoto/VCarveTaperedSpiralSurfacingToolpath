@@ -8,23 +8,18 @@ Important: this package is currently the release scaffold/renamed clone. It is i
 Installation
 ------------
 
-1. Unzip this archive.
-2. Copy the top-level folder named Wrapped_Tapered_Spiral_Surfacing_Toolpath into your Vectric Gadgets folder, for example:
-
-   Public Documents\Vectric\VCarve Pro\V12.0\Gadgets\
-
-   or the equivalent Gadgets folder for your installed Vectric product/version.
+1. Start VCarve.
+1. Goto Gadgets > Install New Gadget...
+2. Select file named wither Wrapped_Tapered_Spiral_Surfacing_Toolpath_local.vgadgets or Wrapped_Tapered_Spiral_Surfacing_Toolpath_dev-<commit>.vgadgets
 3. Restart VCarve.
 4. Open a wrapped rotary job.
 5. Run Gadgets > Wrapped Tapered Spiral Surfacing Toolpath.
-
-Do not overwrite the original Spiral_Layout gadget.
 
 What is included
 ----------------
 
 - Wrapped_Tapered_Spiral_Surfacing_Toolpath.lua: renamed main Lua gadget file.
-- Wrapped_Tapered_Spiral_Surfacing_Toolpath/: renamed dialog/resources folder.
+- Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm and images: dialog/resources files.
 - README.txt: this file.
 - CHANGELOG.txt: release history.
 - LICENSE.txt: original permission notice and alteration note.
