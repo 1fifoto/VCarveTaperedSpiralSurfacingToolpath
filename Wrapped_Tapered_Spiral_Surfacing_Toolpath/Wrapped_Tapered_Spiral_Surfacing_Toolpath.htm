@@ -46,9 +46,20 @@ function setDefaultToolpathName(name) {
 
 function updateAngularStepState() {
     var methods = document.getElementsByName("MachiningMethodOptionGroup");
+    var spacingMethods = document.getElementsByName("SpiralSpacingOptionGroup");
     var angularStep = document.getElementById("AngularStep");
     var label = document.getElementById("AngularStepLabel");
     var units = document.getElementById("AngularStepUnits");
+    var spacingTitle = document.getElementById("SpiralSpacingTitle");
+    var pitchLabel = document.getElementById("StrandPitchLabel");
+    var spacingLabel = document.getElementById("StrandSpacingLabel");
+    var strandPitch = document.getElementById("StrandPitch");
+    var strandSpacing = document.getElementById("StrandSpacing");
+    var pitchUnits = document.getElementById("Units17");
+    var spacingUnits = document.getElementById("Units18");
+    var twistLabel = document.getElementById("TwistDirectionLabel");
+    var rightTwist = document.getElementById("CreateRightHandTwistCheck");
+    var leftTwist = document.getElementById("CreateLeftHandTwistCheck");
     var spiralSelected = false;
 
     if (!angularStep || !methods) {
@@ -68,6 +79,43 @@ function updateAngularStepState() {
     }
     if (units) {
         units.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (spacingTitle) {
+        spacingTitle.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (pitchLabel) {
+        pitchLabel.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (spacingLabel) {
+        spacingLabel.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (strandPitch) {
+        strandPitch.disabled = !spiralSelected;
+        strandPitch.style.backgroundColor = spiralSelected ? "#FFFFFF" : "#E0E0E0";
+        strandPitch.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (strandSpacing) {
+        strandSpacing.disabled = !spiralSelected;
+        strandSpacing.style.backgroundColor = spiralSelected ? "#FFFFFF" : "#E0E0E0";
+        strandSpacing.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (pitchUnits) {
+        pitchUnits.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (spacingUnits) {
+        spacingUnits.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    for (var index = 0; index < spacingMethods.length; index++) {
+        spacingMethods[index].disabled = !spiralSelected;
+    }
+    if (twistLabel) {
+        twistLabel.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (rightTwist) {
+        rightTwist.disabled = !spiralSelected;
+    }
+    if (leftTwist) {
+        leftTwist.disabled = !spiralSelected;
     }
 }
 
@@ -174,6 +222,48 @@ window.onload = updateAngularStepState;
                       <td><span id="AngularStepLabel">Angular Step</span></td>
                       <td><input name="AngularStep" type="text" id="AngularStep" size="5" maxlength="8">
                         &nbsp;<span id="AngularStepUnits">degrees</span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2"><br>
+                        <b><span id="SpiralSpacingTitle">Use Spiral Pitch or Spacing</span></b></td>
+                    </tr>
+                    <tr>
+                      <td><label>
+                          <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
+                          <span id="StrandPitchLabel">Spiral Pitch</span></label></td>
+                      <td><img src="SpiralPitch.png" width="80" height="67" align="middle">
+                        <input name="StrandPitch" type="text" id="StrandPitch" size="5" maxlength="8">
+                        &nbsp;<span id="Units17">units</span></td>
+                    </tr>
+                    <tr>
+                      <td><label>
+                          <input type="radio" name="SpiralSpacingOptionGroup" value="radio">
+                          <span id="StrandSpacingLabel">Spacing between strands</span></label></td>
+                      <td><img src="SpiralSpacing.png" width="80" height="54" align="middle">
+                        <input name="StrandSpacing" type="text" id="StrandSpacing" size="5" maxlength="8">
+                        &nbsp;<span id="Units18">units</span></td>
+                    </tr>
+                    <tr>
+                      <td>Offset from Start</td>
+                      <td><input name="StrandStartOffset" type="text" id="StrandStartOffset" size="5" maxlength="8">
+                        &nbsp;<span id="Units15">units</span></td>
+                    </tr>
+                    <tr>
+                      <td>Offset from End</td>
+                      <td><input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
+                        &nbsp;<span id="Units16">units</span></td>
+                    </tr>
+                    <tr>
+                      <td><br>
+                        <b><span id="TwistDirectionLabel">Twist Direction</span></b></td>
+                      <td><label>
+                          <img src="RightTwistDirection.png" width="44" height="30" align="middle">
+                          <input name="CreateRightHandTwistCheck" type="checkbox" id="CreateRightHandTwistCheck">
+                          Create Right Hand Twist</label><br>
+                        <label>
+                          <img src="LeftTwistDirection.png" width="44" height="30" align="middle">
+                          <input name="CreateLeftHandTwistCheck" type="checkbox" id="CreateLeftHandTwistCheck">
+                          Create Left Hand Twist</label></td>
                     </tr>
                   </table></td>
               </tr>

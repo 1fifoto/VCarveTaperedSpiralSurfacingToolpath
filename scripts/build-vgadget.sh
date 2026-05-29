@@ -7,7 +7,9 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 UNINSTALL_SCRIPT="${REPO_ROOT}/scripts/uninstall-windows-gadget.bat"
 VERSION="${VERSION:-local}"
 DEFAULT_DESTINATION="/Volumes/Shared Data/Projects/Design-and-Making/PConklin"
+DEFAULT_DESTINATION2="/Volumes/BDW20250714/PConklin"
 DESTINATION="${1:-${NAS_DEST:-${DEFAULT_DESTINATION}}}"
+DESTINATION2="${NAS_DEST2:-${DEFAULT_DESTINATION2}}"
 
 cd "${REPO_ROOT}"
 
@@ -33,6 +35,11 @@ if [[ -d "${DESTINATION}" ]]; then
   cp "${UNINSTALL_SCRIPT}" "${DESTINATION}/"
   echo "Copied to ${DESTINATION}/$(basename "${VGADGET_PATH}")"
   echo "Copied to ${DESTINATION}/$(basename "${UNINSTALL_SCRIPT}")"
+elif [[ -d "${DESTINATION2}" ]]; then
+  cp "${VGADGET_PATH}" "${DESTINATION2}/"
+  cp "${UNINSTALL_SCRIPT}" "${DESTINATION2}/"
+  echo "Copied to ${DESTINATION2}/$(basename "${VGADGET_PATH}")"
+  echo "Copied to ${DESTINATION2}/$(basename "${UNINSTALL_SCRIPT}")"
 else
   echo "NAS destination not found: ${DESTINATION}"
   echo "Mount WattNAS or pass a destination path, for example:"

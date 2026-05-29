@@ -42,6 +42,13 @@ g_cylinder_along_x = true
 g_start_diameter = 0.0
 g_end_diameter = 0.0
 g_angular_step = 2.0
+g_spiral_spacing = 0.0625
+g_spiral_pitch = 0.0625
+g_use_spiral_pitch = false
+g_offset_from_start = 0.0
+g_offset_from_end = 0.0
+g_create_right_twist = true
+g_create_left_twist = false
 g_job_min_axis = 0.0
 g_job_min_cross = 0.0
 g_job_wrap_circumference = 0.0
@@ -89,6 +96,13 @@ function GetUserChoices(job, script_path, load_default_values)
       g_start_diameter       = registry:GetDouble("StartDiameter",       g_start_diameter)
       g_end_diameter         = registry:GetDouble("EndDiameter",         g_end_diameter)
       g_angular_step         = registry:GetDouble("AngularStep",         g_angular_step)
+      g_spiral_spacing       = registry:GetDouble("SpiralSpacing",       g_spiral_spacing)
+      g_spiral_pitch         = registry:GetDouble("SpiralPitch",         g_spiral_pitch)
+      g_use_spiral_pitch     = registry:GetBool  ("UseSpiralPitch",      g_use_spiral_pitch)
+      g_offset_from_start    = registry:GetDouble("OffsetFromStart",     g_offset_from_start)
+      g_offset_from_end      = registry:GetDouble("OffsetFromEnd",       g_offset_from_end)
+      g_create_right_twist   = registry:GetBool("CreateRightTwist",      g_create_right_twist)
+      g_create_left_twist    = registry:GetBool("CreateLeftTwist",       g_create_left_twist)
 
       g_window_width         = registry:GetInt("WindowWidth",         g_window_width)
       g_window_height        = registry:GetInt("WindowHeight",        g_window_height)
@@ -110,6 +124,11 @@ function GetUserChoices(job, script_path, load_default_values)
      dims_from_job = true;
    else
      DisplayMessageBox("Current job is not a wrapped rotary job!");
+   end
+
+   if dims_from_job then
+      g_square_side_len = g_cylinder_diameter
+      g_blank_diameter = g_cylinder_diameter
    end
 
    if g_start_diameter <= 0.0 or g_start_diameter > g_cylinder_diameter then
@@ -142,6 +161,10 @@ function GetUserChoices(job, script_path, load_default_values)
    dialog:AddLabelField("Units12", units_text)
    dialog:AddLabelField("Units13", units_text)
    dialog:AddLabelField("Units14", units_text)
+   dialog:AddLabelField("Units15", units_text)
+   dialog:AddLabelField("Units16", units_text)
+   dialog:AddLabelField("Units17", units_text)
+   dialog:AddLabelField("Units18", units_text)
 
    -- connect up fields we use for getting options
    local blank_type_index = 1
@@ -169,6 +192,19 @@ function GetUserChoices(job, script_path, load_default_values)
    dialog:AddDoubleField("StartDiameter", g_start_diameter)
    dialog:AddDoubleField("EndDiameter",   g_end_diameter)
    dialog:AddDoubleField("AngularStep",   g_angular_step)
+
+   local spiral_spacing_index = 2
+   if g_use_spiral_pitch then
+      spiral_spacing_index = 1
+   end
+   dialog:AddRadioGroup("SpiralSpacingOptionGroup", spiral_spacing_index)
+   dialog:AddDoubleField("StrandPitch",   g_spiral_pitch)
+   dialog:AddDoubleField("StrandSpacing", g_spiral_spacing)
+
+   dialog:AddDoubleField("StrandStartOffset", g_offset_from_start)
+   dialog:AddDoubleField("StrandEndOffset",   g_offset_from_end)
+   dialog:AddCheckBox("CreateRightHandTwistCheck", g_create_right_twist)
+   dialog:AddCheckBox("CreateLeftHandTwistCheck",  g_create_left_twist)
 
    -- Cylinder Dimensions - read only
    dialog:AddLabelField("CylinderLength",    tostring(g_cylinder_length))
@@ -215,6 +251,21 @@ function GetUserChoices(job, script_path, load_default_values)
    g_start_diameter = dialog:GetDoubleField("StartDiameter")
    g_end_diameter   = dialog:GetDoubleField("EndDiameter")
    g_angular_step   = dialog:GetDoubleField("AngularStep")
+   g_spiral_pitch   = dialog:GetDoubleField("StrandPitch")
+   g_spiral_spacing = dialog:GetDoubleField("StrandSpacing")
+   spiral_spacing_index = dialog:GetRadioIndex("SpiralSpacingOptionGroup")
+   if spiral_spacing_index == 1 then
+      g_use_spiral_pitch = true
+   elseif spiral_spacing_index == 2 then
+      g_use_spiral_pitch = false
+   else
+      MessageBox("Unknown spiral spacing option index from dialog " .. spiral_spacing_index)
+      return 0
+   end
+   g_offset_from_start = dialog:GetDoubleField("StrandStartOffset")
+   g_offset_from_end   = dialog:GetDoubleField("StrandEndOffset")
+   g_create_right_twist = dialog:GetCheckBox("CreateRightHandTwistCheck")
+   g_create_left_twist  = dialog:GetCheckBox("CreateLeftHandTwistCheck")
 
    if g_cylinder_length <= 0.0 then
       DisplayMessageBox("The cylinder length must be greater than 0.0")
@@ -279,6 +330,44 @@ function GetUserChoices(job, script_path, load_default_values)
       return -1
    end
 
+   if g_toolpath_type == 1 then
+      if g_use_spiral_pitch then
+         if g_spiral_pitch <= 0.0 then
+            DisplayMessageBox("The spiral pitch must be greater than 0.0")
+            return -1
+         end
+      else
+         if g_spiral_spacing <= 0.0 then
+            DisplayMessageBox("The spacing between strands must be greater than 0.0")
+            return -1
+         end
+         if g_spiral_spacing >= g_cylinder_diameter * math.pi then
+            DisplayMessageBox("The spacing between strands must be less than the cylinder circumference")
+            return -1
+         end
+      end
+   end
+
+   if g_offset_from_start < 0.0 then
+      DisplayMessageBox("The offset from start must be zero or greater")
+      return -1
+   end
+
+   if g_offset_from_end < 0.0 then
+      DisplayMessageBox("The offset from end must be zero or greater")
+      return -1
+   end
+
+   if ((g_offset_from_start + g_offset_from_end) > g_cylinder_length) then
+      DisplayMessageBox("The start and end offsets combined must not exceed the cylinder length")
+      return -1
+   end
+
+   if g_toolpath_type == 1 and (not g_create_right_twist) and (not g_create_left_twist) then
+      DisplayMessageBox("You must create either a left or right twist or both")
+      return -1
+   end
+
    local max_taper_diameter = math.max(g_start_diameter, g_end_diameter) + g_allowance
    if g_blank_is_square and g_square_side_len < max_taper_diameter then
       DisplayMessageBox("The size of the square blank (" .. g_square_side_len .. ") must be equal to or greater than the largest taper diameter + allowance (" .. max_taper_diameter .. ")" )
@@ -321,6 +410,13 @@ function GetUserChoices(job, script_path, load_default_values)
    registry:SetDouble("StartDiameter",      g_start_diameter)
    registry:SetDouble("EndDiameter",        g_end_diameter)
    registry:SetDouble("AngularStep",        g_angular_step)
+   registry:SetDouble("SpiralSpacing",      g_spiral_spacing)
+   registry:SetDouble("SpiralPitch",        g_spiral_pitch)
+   registry:SetBool  ("UseSpiralPitch",     g_use_spiral_pitch)
+   registry:SetDouble("OffsetFromStart",    g_offset_from_start)
+   registry:SetDouble("OffsetFromEnd",      g_offset_from_end)
+   registry:SetBool("CreateRightTwist",     g_create_right_twist)
+   registry:SetBool("CreateLeftTwist",      g_create_left_twist)
 
    registry:SetInt("WindowWidth",           g_window_width)
    registry:SetInt("WindowHeight",          g_window_height)
@@ -887,6 +983,19 @@ function UsesJobSetupDiameter()
    return IsConstantDiameter() and math.abs(g_start_diameter - g_cylinder_diameter) < 0.000001
 end
 
+function UsesFullLength()
+   return math.abs(g_offset_from_start) < 0.000001 and math.abs(g_offset_from_end) < 0.000001
+end
+
+function GetEffectiveCylinderLength()
+   local length = g_cylinder_length - g_offset_from_start - g_offset_from_end
+   if length < 0.0 then
+      return 0.0
+   end
+
+   return length
+end
+
 function GetBaseCylinderRadius()
    return g_cylinder_diameter * 0.5
 end
@@ -936,8 +1045,8 @@ function AxisCrossToPoint(axis_distance, cross_distance)
 end
 
 function GetTaperedPassOffsets(job, outer_radius)
-   local smallest_target_radius = math.min(g_start_diameter, g_end_diameter) * 0.5
-   local max_radial_stock = outer_radius - (smallest_target_radius + g_allowance)
+   local largest_target_radius = math.max(g_start_diameter, g_end_diameter) * 0.5
+   local max_radial_stock = outer_radius - (largest_target_radius + g_allowance)
    if max_radial_stock < 0.0 then
       max_radial_stock = 0.0
    end
@@ -973,7 +1082,7 @@ end
 
 function CreateTaperedRasterLevelContour(raster_along_axis, pass_offset, stepover, reverse_end, outer_radius)
    local width = g_job_wrap_circumference
-   local length = g_cylinder_length
+   local length = GetEffectiveCylinderLength()
    local step_span = width
    if not raster_along_axis then
       step_span = length
@@ -998,13 +1107,13 @@ function CreateTaperedRasterLevelContour(raster_along_axis, pass_offset, stepove
 
    for n = 1, num_lines do
       local step_distance = (n - 1) * raster_stepover
-      local start_axis = 0.0
+      local start_axis = g_offset_from_start
       local start_cross = step_distance
-      local end_axis = length
+      local end_axis = g_cylinder_length - g_offset_from_end
       local end_cross = step_distance
 
       if not raster_along_axis then
-         start_axis = step_distance
+         start_axis = g_offset_from_start + step_distance
          start_cross = 0.0
          end_axis = start_axis
          end_cross = width
@@ -1113,42 +1222,50 @@ function CreateTaperedRasterToolpathFromRadius(job, raster_along_axis, outer_rad
    return true
 end
 
-function CreateTaperedSpiralToolpath(job)
-   PrepareTaperedCoordinates(job)
+function GetTaperedSpiralTurns(effective_length)
+   local axial_pitch = g_spiral_pitch
 
-   local stepover = g_tool:ConvertValueToUnits(g_tool.Stepover, job.InMM)
-   if stepover <= 0.0 then
-      DisplayMessageBox("The selected tool must have a stepover greater than 0.0")
-      return false
+   if not g_use_spiral_pitch then
+      local circumference = g_cylinder_diameter * math.pi
+      local spacing_ratio = g_spiral_spacing / circumference
+      local alpha = math.asin(spacing_ratio)
+      axial_pitch = circumference * math.tan(alpha)
    end
 
-   local outer_radius = 0.0
-   if g_blank_is_square then
-      local square_side_radius = g_square_side_len * 0.5
-      outer_radius = math.sqrt((square_side_radius * square_side_radius) + (square_side_radius * square_side_radius))
-   else
-      outer_radius = g_blank_diameter * 0.5
+   if axial_pitch <= 0.0 then
+      axial_pitch = effective_length
    end
 
-   local turns = g_cylinder_length / stepover
+   local turns = effective_length / axial_pitch
    if turns < 1.0 then
       turns = 1.0
    end
-   local total_angle = turns * 360.0
-   local segment_count = math.floor((total_angle / g_angular_step) + 0.5)
-   if segment_count < 1 then
-      segment_count = 1
+   return turns
+end
+
+function GetSpiralCrossSign(right_hand)
+   if g_cylinder_along_x then
+      if right_hand then
+         return -1.0
+      end
+      return 1.0
    end
 
-   local spiral_group = ContourGroup(true)
-   local pass_offsets = GetTaperedPassOffsets(job, outer_radius)
+   if right_hand then
+      return 1.0
+   end
+   return -1.0
+end
+
+function AddTaperedSpiralContours(spiral_group, effective_length, turns, segment_count, pass_offsets, outer_radius, right_hand)
+   local cross_sign = GetSpiralCrossSign(right_hand)
 
    for pass_index = 1, #pass_offsets do
       local contour = Contour(0.0)
       for segment_index = 0, segment_count do
          local ratio = segment_index / segment_count
-         local axis_distance = g_cylinder_length * ratio
-         local cross_distance = g_job_wrap_circumference * turns * ratio
+         local axis_distance = g_offset_from_start + (effective_length * ratio)
+         local cross_distance = cross_sign * g_job_wrap_circumference * turns * ratio
          local z_value = GetCutZAtAxis(axis_distance, pass_offsets[pass_index], outer_radius)
          local point = AxisCrossToPoint(axis_distance, cross_distance)
 
@@ -1165,6 +1282,38 @@ function CreateTaperedSpiralToolpath(job)
       end
 
       spiral_group:AddTail(contour)
+   end
+
+   return true
+end
+
+function CreateTaperedSpiralToolpath(job)
+   PrepareTaperedCoordinates(job)
+
+   local outer_radius = 0.0
+   if g_blank_is_square then
+      local square_side_radius = g_square_side_len * 0.5
+      outer_radius = math.sqrt((square_side_radius * square_side_radius) + (square_side_radius * square_side_radius))
+   else
+      outer_radius = g_blank_diameter * 0.5
+   end
+
+   local effective_length = GetEffectiveCylinderLength()
+   local turns = GetTaperedSpiralTurns(effective_length)
+   local total_angle = turns * 360.0
+   local segment_count = math.floor((total_angle / g_angular_step) + 0.5)
+   if segment_count < 1 then
+      segment_count = 1
+   end
+
+   local spiral_group = ContourGroup(true)
+   local pass_offsets = GetTaperedPassOffsets(job, outer_radius)
+
+   if g_create_right_twist then
+      AddTaperedSpiralContours(spiral_group, effective_length, turns, segment_count, pass_offsets, outer_radius, true)
+   end
+   if g_create_left_twist then
+      AddTaperedSpiralContours(spiral_group, effective_length, turns, segment_count, pass_offsets, outer_radius, false)
    end
 
    if not CreateToolpath(job, g_toolpath_name, spiral_group) then
@@ -1239,19 +1388,19 @@ function main(script_path)
    if g_toolpath_type == 1 then
       CreateTaperedSpiralToolpath(job)
    elseif g_toolpath_type == 2 then
-      if UsesJobSetupDiameter() then
+      if UsesJobSetupDiameter() and UsesFullLength() then
          CreateSimpleRasterToolpath(job, false)
       else
          CreateTaperedRasterToolpath(job, false)
       end
    elseif g_toolpath_type == 3 then
-      if UsesJobSetupDiameter() then
+      if UsesJobSetupDiameter() and UsesFullLength() then
          CreateSimpleRasterToolpath(job, true)
       else
          CreateTaperedRasterToolpath(job, true)
       end
    elseif g_toolpath_type == 4 then
-      if UsesJobSetupDiameter() then
+      if UsesJobSetupDiameter() and UsesFullLength() then
          CreateOptimisedRasterToolpath(job, true)
       else
          CreateTaperedOptimisedRasterToolpath(job)
