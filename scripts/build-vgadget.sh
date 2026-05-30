@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GADGET_NAME="Wrapped_Tapered_Spiral_Surfacing_Toolpath"
+GADGET_NAME="Create_Tapered_Rounding_Toolpath"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 UNINSTALL_SCRIPT="${REPO_ROOT}/scripts/uninstall-windows-gadget.bat"

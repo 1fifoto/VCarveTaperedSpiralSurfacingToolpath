@@ -140,7 +140,7 @@ function GetUserChoices(job, script_path, load_default_values)
    end
 
    -- display our dialog to get user choices
-   local html_path = "file:"..script_path.."\\Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm"
+   local html_path = "file:"..script_path.."\\Create_Tapered_Rounding_Toolpath.htm"
    local dialog = HTML_Dialog(false, html_path, g_window_width, g_window_height, g_dialog_title)
 
    -- Set up units fields on form -----------------

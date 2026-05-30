@@ -4,7 +4,7 @@ CHANGELOG
 Unreleased
 ----------
 
-- Created safe renamed release package: Wrapped Tapered Spiral Surfacing Toolpath.
+- Created safe renamed release package: Create Tapered Rounding Toolpath.
 - Preserved original gadget behavior for clone-validation phase.
 - Renamed top-level folder, Lua file, resource folder, HTML file, dialog title, registry key, and visible HTML title.
 - Added README, CHANGELOG, and LICENSE files.
@@ -21,6 +21,6 @@ Unreleased
 - Added pure geometry helpers for tapered spiral sampling (RadiusAtX, AngleAtX, WrappedYAtX, SampleTaperedSpiral).
 - Switched spiral preview generation to sampled tapered polyline vectors driven by angular step.
 - Added temporary guard requiring Spiral Pitch mode for tapered preview generation.
-- Fixed HTML dialog path lookup to use the renamed Wrapped_Tapered_Spiral_Surfacing_Toolpath resource folder.
+- Fixed HTML dialog path lookup to use the renamed Create_Tapered_Rounding_Toolpath resource folder.
 - Updated gadget HTML copy/title to match current wrapped tapered preview behavior and pitch-mode requirement.
 - Corrected manual install path in gadget description text.

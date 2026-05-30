@@ -1,4 +1,4 @@
-Wrapped Tapered Spiral Surfacing Toolpath
+Create Tapered Rounding Toolpath
 ====================================
 
 This release package is a safe, renamed gadget folder derived from Vectric's Wrapped Spiral Layout gadget.
@@ -10,16 +10,16 @@ Installation
 
 1. Start VCarve.
 1. Goto Gadgets > Install New Gadget...
-2. Select file named wither Wrapped_Tapered_Spiral_Surfacing_Toolpath_local.vgadgets or Wrapped_Tapered_Spiral_Surfacing_Toolpath_dev-<commit>.vgadgets
+2. Select file named wither Create_Tapered_Rounding_Toolpath_local.vgadgets or Create_Tapered_Rounding_Toolpath_dev-<commit>.vgadgets
 3. Restart VCarve.
 4. Open a wrapped rotary job.
-5. Run Gadgets > Wrapped Tapered Spiral Surfacing Toolpath.
+5. Run Gadgets > Create Tapered Rounding Toolpath.
 
 What is included
 ----------------
 
-- Wrapped_Tapered_Spiral_Surfacing_Toolpath.lua: renamed main Lua gadget file.
-- Wrapped_Tapered_Spiral_Surfacing_Toolpath.htm and images: dialog/resources files.
+- Create_Tapered_Rounding_Toolpath.lua: renamed main Lua gadget file.
+- Create_Tapered_Rounding_Toolpath.htm and images: dialog/resources files.
 - README.txt: this file.
 - CHANGELOG.txt: release history.
 - LICENSE.txt: original permission notice and alteration note.

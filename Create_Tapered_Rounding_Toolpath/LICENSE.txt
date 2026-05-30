@@ -9,4 +9,4 @@ This package is plainly marked as an altered source version and retains the orig
 
 Additional alteration note:
 
-Wrapped Tapered Spiral Surfacing Toolpath v1.0.0 is a renamed clone/release scaffold prepared for adding tapered spiral geometry. It is not represented as the original Vectric gadget.
+Create Tapered Rounding Toolpath v1.0.0 is a renamed clone/release scaffold prepared for adding tapered spiral geometry. It is not represented as the original Vectric gadget.

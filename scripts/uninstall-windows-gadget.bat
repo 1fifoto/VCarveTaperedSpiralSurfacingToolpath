@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set "TRIAL_GADGET_NAME=Wrapped_Tapered_Spiral_Surfacing_Toolpath"
+set "TRIAL_GADGET_NAME=Create_Tapered_Rounding_Toolpath"
 set "FOUND=0"
 
 echo.
