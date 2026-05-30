@@ -48,6 +48,7 @@ function updateAngularStepState() {
     var methods = document.getElementsByName("MachiningMethodOptionGroup");
     var spacingMethods = document.getElementsByName("SpiralSpacingOptionGroup");
     var angularStep = document.getElementById("AngularStep");
+    var angularTitle = document.getElementById("AngularStepTitle");
     var label = document.getElementById("AngularStepLabel");
     var units = document.getElementById("AngularStepUnits");
     var spacingTitle = document.getElementById("SpiralSpacingTitle");
@@ -58,6 +59,8 @@ function updateAngularStepState() {
     var pitchUnits = document.getElementById("Units17");
     var spacingUnits = document.getElementById("Units18");
     var twistLabel = document.getElementById("TwistDirectionLabel");
+    var rightTwistLabel = document.getElementById("RightTwistLabel");
+    var leftTwistLabel = document.getElementById("LeftTwistLabel");
     var rightTwist = document.getElementById("CreateRightHandTwistCheck");
     var leftTwist = document.getElementById("CreateLeftHandTwistCheck");
     var spiralSelected = false;
@@ -66,14 +69,17 @@ function updateAngularStepState() {
         return;
     }
 
-    if (methods.length > 0) {
-        spiralSelected = methods[0].checked;
+    if (methods.length > 3) {
+        spiralSelected = methods[3].checked;
     }
 
     angularStep.disabled = !spiralSelected;
     angularStep.style.backgroundColor = spiralSelected ? "#FFFFFF" : "#E0E0E0";
     angularStep.style.color = spiralSelected ? "#000000" : "#777777";
 
+    if (angularTitle) {
+        angularTitle.style.color = spiralSelected ? "#000000" : "#777777";
+    }
     if (label) {
         label.style.color = spiralSelected ? "#000000" : "#777777";
     }
@@ -110,6 +116,12 @@ function updateAngularStepState() {
     }
     if (twistLabel) {
         twistLabel.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (rightTwistLabel) {
+        rightTwistLabel.style.color = spiralSelected ? "#000000" : "#777777";
+    }
+    if (leftTwistLabel) {
+        leftTwistLabel.style.color = spiralSelected ? "#000000" : "#777777";
     }
     if (rightTwist) {
         rightTwist.disabled = !spiralSelected;
@@ -161,19 +173,13 @@ window.onload = updateAngularStepState;
                   &nbsp;<span id="Units11">units</span></td>
               </tr>
               <tr>
-                <td width="50%"><table width="100%" border="0">
+                <td width="50%" valign="top"><table width="100%" border="0">
                     <tr>
                       <td colspan="2"><br>
                         <b>Machining Method</b></td>
                     </tr>
                     <tr>
-                      <td width="60px"><img src="WrappedSpiral.png" width="60" height="53" align="middle"></td>
-                      <td><label>
-                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Spiral'); updateAngularStepState()">
-                          Spiral (continuous rotary pass)</label></td>
-                    </tr>
-                    <tr>
-                      <td><img src="Toolpath_Radial.png" width="60" height="53" align="middle"></td>
+                      <td width="60px"><img src="Toolpath_Radial.png" width="60" height="53" align="middle"></td>
                       <td><label>
                           <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Radial'); updateAngularStepState()">
                           Radial (around cylinder) </label></td>
@@ -191,6 +197,39 @@ window.onload = updateAngularStepState;
                           Optimized Raster (along cylinder)<br>
                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;square blank only</label></td>
                     </tr>
+                    <tr>
+                      <td><img src="WrappedSpiral.png" width="60" height="53" align="middle"></td>
+                      <td><label>
+                          <input type="radio" name="MachiningMethodOptionGroup" value="radio" onclick="setDefaultToolpathName('Tapered Spiral'); updateAngularStepState()">
+                          Spiral (continuous rotary pass)</label></td>
+                    </tr>
+                    <tr>
+                      <td colspan="3"><br>
+                        <strong>Taper Dimensions</strong><br></td>
+                    </tr>
+                    <tr>
+                      <td align="left"><img src="TaperDimensions.png" width="120" height="90" align="middle"></td>
+                      <td colspan="2">Start Diameter&nbsp;&nbsp;
+                        <input name="StartDiameter" type="text" id="StartDiameter" size="5" maxlength="8">
+                        &nbsp;<span id="Units13">units</span><br>
+                        End Diameter&nbsp;&nbsp;
+                        <input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
+                        &nbsp;<span id="Units14">units</span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2"><br>
+                        <b>Offsets</b></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">Offset from Start&nbsp;&nbsp;
+                        <input name="StrandStartOffset" type="text" id="StrandStartOffset" size="5" maxlength="8">
+                        &nbsp;<span id="Units15">units</span></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">Offset from End&nbsp;&nbsp;
+                        <input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
+                        &nbsp;<span id="Units16">units</span></td>
+                    </tr>
                   </table></td>
                 <td valign="top"><table width="100%" border="0">
                     <tr>
@@ -198,34 +237,23 @@ window.onload = updateAngularStepState;
                         <strong>Allowance</strong><br></td>
                     </tr>
                     <tr>
-                      <td align="left"><img src="Allowance.png" width="60" height="54" align="middle"></td>
-                      <td width="50%"> Amount of material to leave&nbsp;&nbsp; </td>
-                      <td><input name="Allowance" type="text" id="Allowance" size="5" maxlength="8">
+                      <td colspan="3"><img src="Allowance.png" width="60" height="54" align="middle">
+                        Amount of material to leave&nbsp;&nbsp;
+                        <input name="Allowance" type="text" id="Allowance" size="5" maxlength="8">
                         &nbsp;<span id="Units12">units</span></td>
                     </tr>
                     <tr>
                       <td colspan="3"><br>
-                        <strong>Taper Dimensions</strong><br></td>
+                        <b><span id="AngularStepTitle">Spiral Angular Step</span></b></td>
                     </tr>
                     <tr>
-                      <td rowspan="2" align="center"><img src="TaperDimensions.png" width="120" height="90" align="middle"></td>
-                      <td>Start Diameter</td>
-                      <td><input name="StartDiameter" type="text" id="StartDiameter" size="5" maxlength="8">
-                        &nbsp;<span id="Units13">units</span></td>
-                    </tr>
-                    <tr>
-                      <td>End Diameter</td>
-                      <td><input name="EndDiameter" type="text" id="EndDiameter" size="5" maxlength="8">
-                        &nbsp;<span id="Units14">units</span></td>
-                    </tr>
-                    <tr>
-                      <td><span id="AngularStepLabel">Angular Step</span></td>
-                      <td><input name="AngularStep" type="text" id="AngularStep" size="5" maxlength="8">
+                      <td colspan="3"><span id="AngularStepLabel">Angular Step Amount</span>&nbsp;&nbsp;
+                        <input name="AngularStep" type="text" id="AngularStep" size="5" maxlength="8">
                         &nbsp;<span id="AngularStepUnits">degrees</span></td>
                     </tr>
                     <tr>
-                      <td colspan="2"><br>
-                        <b><span id="SpiralSpacingTitle">Use Spiral Pitch or Spacing</span></b></td>
+                      <td colspan="3"><br>
+                        <b><span id="SpiralSpacingTitle">Spiral Pitch or Spacing</span></b></td>
                     </tr>
                     <tr>
                       <td><label>
@@ -244,26 +272,18 @@ window.onload = updateAngularStepState;
                         &nbsp;<span id="Units18">units</span></td>
                     </tr>
                     <tr>
-                      <td>Offset from Start</td>
-                      <td><input name="StrandStartOffset" type="text" id="StrandStartOffset" size="5" maxlength="8">
-                        &nbsp;<span id="Units15">units</span></td>
+                      <td colspan="3"><br>
+                        <b><span id="TwistDirectionLabel">Spiral Twist Direction</span></b></td>
                     </tr>
                     <tr>
-                      <td>Offset from End</td>
-                      <td><input name="StrandEndOffset" type="text" id="StrandEndOffset" size="5" maxlength="8">
-                        &nbsp;<span id="Units16">units</span></td>
-                    </tr>
-                    <tr>
-                      <td><br>
-                        <b><span id="TwistDirectionLabel">Twist Direction</span></b></td>
-                      <td><label>
+                      <td colspan="3"><label>
                           <img src="RightTwistDirection.png" width="44" height="30" align="middle">
                           <input name="CreateRightHandTwistCheck" type="checkbox" id="CreateRightHandTwistCheck">
-                          Create Right Hand Twist</label><br>
+                          <span id="RightTwistLabel">Create Right Hand Twist</span></label><br>
                         <label>
                           <img src="LeftTwistDirection.png" width="44" height="30" align="middle">
                           <input name="CreateLeftHandTwistCheck" type="checkbox" id="CreateLeftHandTwistCheck">
-                          Create Left Hand Twist</label></td>
+                          <span id="LeftTwistLabel">Create Left Hand Twist</span></label></td>
                     </tr>
                   </table></td>
               </tr>

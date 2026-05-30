@@ -31,7 +31,7 @@ require "strict"
 
 -- Default values for variables
 
-g_toolpath_type = 1 -- 1 = spiral, 2 = radial, 3 = raster, 4 = optimized raster
+g_toolpath_type = 4 -- 1 = radial, 2 = raster, 3 = optimized raster, 4 = spiral
 g_square_side_len = 1.25
 g_blank_diameter = 1.25
 g_blank_is_square = true
@@ -294,9 +294,9 @@ function GetUserChoices(job, script_path, load_default_values)
       end
 
       -- if user has chosen a round blank and optimised machining just set raster
-      if g_toolpath_type == 4 then
+      if g_toolpath_type == 3 then
          DisplayMessageBox("Optimized Raster strategy is not valid for round blanks - defaulting to Raster")
-         g_toolpath_type = 3
+         g_toolpath_type = 2
       end
    end
 
@@ -320,17 +320,17 @@ function GetUserChoices(job, script_path, load_default_values)
       return -1
    end
 
-   if g_toolpath_type == 1 and g_angular_step <= 0.0 then
+   if g_toolpath_type == 4 and g_angular_step <= 0.0 then
       DisplayMessageBox("The angular step must be greater than 0.0 degrees")
       return -1
    end
 
-   if g_toolpath_type == 1 and g_angular_step > 360.0 then
+   if g_toolpath_type == 4 and g_angular_step > 360.0 then
       DisplayMessageBox("The angular step must be 360.0 degrees or less")
       return -1
    end
 
-   if g_toolpath_type == 1 then
+   if g_toolpath_type == 4 then
       if g_use_spiral_pitch then
          if g_spiral_pitch <= 0.0 then
             DisplayMessageBox("The spiral pitch must be greater than 0.0")
@@ -363,7 +363,7 @@ function GetUserChoices(job, script_path, load_default_values)
       return -1
    end
 
-   if g_toolpath_type == 1 and (not g_create_right_twist) and (not g_create_left_twist) then
+   if g_toolpath_type == 4 and (not g_create_right_twist) and (not g_create_left_twist) then
       DisplayMessageBox("You must create either a left or right twist or both")
       return -1
    end
@@ -1385,21 +1385,21 @@ function main(script_path)
 
    -- Create the selected toolpath. Straight cylinders use the original
    -- Create Rounding Toolpath implementation for radial/raster/optimized.
-   if g_toolpath_type == 1 then
+   if g_toolpath_type == 4 then
       CreateTaperedSpiralToolpath(job)
-   elseif g_toolpath_type == 2 then
+   elseif g_toolpath_type == 1 then
       if UsesJobSetupDiameter() and UsesFullLength() then
          CreateSimpleRasterToolpath(job, false)
       else
          CreateTaperedRasterToolpath(job, false)
       end
-   elseif g_toolpath_type == 3 then
+   elseif g_toolpath_type == 2 then
       if UsesJobSetupDiameter() and UsesFullLength() then
          CreateSimpleRasterToolpath(job, true)
       else
          CreateTaperedRasterToolpath(job, true)
       end
-   elseif g_toolpath_type == 4 then
+   elseif g_toolpath_type == 3 then
       if UsesJobSetupDiameter() and UsesFullLength() then
          CreateOptimisedRasterToolpath(job, true)
       else
