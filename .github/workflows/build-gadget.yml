@@ -25,7 +25,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          GADGET_NAME="Wrapped_Tapered_Spiral_Surfacing_Toolpath"
+          GADGET_NAME="Create_Tapered_Rounding_Toolpath"
 
           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             VERSION="${GITHUB_REF_NAME}"
