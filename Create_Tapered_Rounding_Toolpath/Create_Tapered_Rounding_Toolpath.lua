@@ -1000,6 +1000,10 @@ function UsesFullLength()
 end
 
 function DebugOpen()
+   if not g_debug then
+      return
+   end
+
    g_debug_message = "Create Tapered Rounding Toolpath debug\n" ..
                      "toolpath_type=" .. tostring(g_toolpath_type) .. "\n" ..
                      "cylinder_diameter=" .. tostring(g_cylinder_diameter) .. "\n" ..
@@ -1010,22 +1014,7 @@ function DebugOpen()
    g_debug_message_count = 0
 
    if g_debug_console_only then
-      print("Create Tapered Rounding Toolpath debug start")
-      print("debug_enabled=" .. tostring(g_debug))
-      print("version=" .. tostring(g_version))
-      print("toolpath_name=" .. tostring(g_toolpath_name))
-      print("toolpath_type=" .. tostring(g_toolpath_type))
-      print("cylinder_length=" .. tostring(g_cylinder_length))
-      print("cylinder_diameter=" .. tostring(g_cylinder_diameter))
-      print("start_diameter=" .. tostring(g_start_diameter))
-      print("end_diameter=" .. tostring(g_end_diameter))
-      print("allowance=" .. tostring(g_allowance))
-      print("offset_from_start=" .. tostring(g_offset_from_start))
-      print("offset_from_end=" .. tostring(g_offset_from_end))
-      print("base_radius=" .. tostring(GetBaseCylinderRadius()))
-      if g_debug then
-         print("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y")
-      end
+      print("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y")
       return
    end
 
@@ -1041,35 +1030,18 @@ function DebugOpen()
    end
    g_debug_file = io.output()
 
-   g_debug_file:write("Create Tapered Rounding Toolpath debug start\n")
-   g_debug_file:write("debug_enabled=" .. tostring(g_debug) .. "\n")
-   g_debug_file:write("version=" .. tostring(g_version) .. "\n")
-   g_debug_file:write("toolpath_name=" .. tostring(g_toolpath_name) .. "\n")
-   g_debug_file:write("toolpath_type=" .. tostring(g_toolpath_type) .. "\n")
-   g_debug_file:write("cylinder_length=" .. tostring(g_cylinder_length) .. "\n")
-   g_debug_file:write("cylinder_diameter=" .. tostring(g_cylinder_diameter) .. "\n")
-   g_debug_file:write("start_diameter=" .. tostring(g_start_diameter) .. "\n")
-   g_debug_file:write("end_diameter=" .. tostring(g_end_diameter) .. "\n")
-   g_debug_file:write("allowance=" .. tostring(g_allowance) .. "\n")
-   g_debug_file:write("offset_from_start=" .. tostring(g_offset_from_start) .. "\n")
-   g_debug_file:write("offset_from_end=" .. tostring(g_offset_from_end) .. "\n")
-   g_debug_file:write("base_radius=" .. tostring(GetBaseCylinderRadius()) .. "\n")
-   if g_debug then
-      g_debug_file:write("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y\n")
-   end
+   g_debug_file:write("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y\n")
 end
 
 function DebugClose()
    if g_debug_console_only then
-      print("Create Tapered Rounding Toolpath debug end")
       if g_debug then
-         DisplayMessageBox(g_debug_message .. "Create Tapered Rounding Toolpath debug end")
+         DisplayMessageBox(g_debug_message)
       end
       return
    end
 
    if g_debug_file ~= nil then
-      g_debug_file:write("Create Tapered Rounding Toolpath debug end\n")
       g_debug_file:close()
       g_debug_file = nil
       if g_debug then
