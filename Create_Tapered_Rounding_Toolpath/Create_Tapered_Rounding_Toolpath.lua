@@ -53,6 +53,14 @@ g_job_min_axis = 0.0
 g_job_min_cross = 0.0
 g_job_wrap_circumference = 0.0
 
+g_debug = false
+g_debug_file = nil
+g_debug_path = "taper-debug.txt"
+g_debug_console_only = true
+g_debug_message = ""
+g_debug_message_count = 0
+g_debug_message_limit = 12
+
 
 g_window_width = 740
 g_window_height = 800
@@ -103,6 +111,7 @@ function GetUserChoices(job, script_path, load_default_values)
       g_offset_from_end      = registry:GetDouble("OffsetFromEnd",       g_offset_from_end)
       g_create_right_twist   = registry:GetBool("CreateRightTwist",      g_create_right_twist)
       g_create_left_twist    = registry:GetBool("CreateLeftTwist",       g_create_left_twist)
+      g_debug                = registry:GetBool("Debug",                 g_debug)
 
       g_window_width         = registry:GetInt("WindowWidth",         g_window_width)
       g_window_height        = registry:GetInt("WindowHeight",        g_window_height)
@@ -205,6 +214,7 @@ function GetUserChoices(job, script_path, load_default_values)
    dialog:AddDoubleField("StrandEndOffset",   g_offset_from_end)
    dialog:AddCheckBox("CreateRightHandTwistCheck", g_create_right_twist)
    dialog:AddCheckBox("CreateLeftHandTwistCheck",  g_create_left_twist)
+   dialog:AddCheckBox("DebugCheck", g_debug)
 
    -- Cylinder Dimensions - read only
    dialog:AddLabelField("CylinderLength",    tostring(g_cylinder_length))
@@ -266,6 +276,7 @@ function GetUserChoices(job, script_path, load_default_values)
    g_offset_from_end   = dialog:GetDoubleField("StrandEndOffset")
    g_create_right_twist = dialog:GetCheckBox("CreateRightHandTwistCheck")
    g_create_left_twist  = dialog:GetCheckBox("CreateLeftHandTwistCheck")
+   g_debug              = dialog:GetCheckBox("DebugCheck")
 
    if g_cylinder_length <= 0.0 then
       DisplayMessageBox("The cylinder length must be greater than 0.0")
@@ -417,6 +428,7 @@ function GetUserChoices(job, script_path, load_default_values)
    registry:SetDouble("OffsetFromEnd",      g_offset_from_end)
    registry:SetBool("CreateRightTwist",     g_create_right_twist)
    registry:SetBool("CreateLeftTwist",      g_create_left_twist)
+   registry:SetBool("Debug",                g_debug)
 
    registry:SetInt("WindowWidth",           g_window_width)
    registry:SetInt("WindowHeight",          g_window_height)
@@ -987,6 +999,127 @@ function UsesFullLength()
    return math.abs(g_offset_from_start) < 0.000001 and math.abs(g_offset_from_end) < 0.000001
 end
 
+function DebugOpen()
+   g_debug_message = "Create Tapered Rounding Toolpath debug\n" ..
+                     "toolpath_type=" .. tostring(g_toolpath_type) .. "\n" ..
+                     "cylinder_diameter=" .. tostring(g_cylinder_diameter) .. "\n" ..
+                     "start_diameter=" .. tostring(g_start_diameter) .. "\n" ..
+                     "end_diameter=" .. tostring(g_end_diameter) .. "\n" ..
+                     "allowance=" .. tostring(g_allowance) .. "\n" ..
+                     "base_radius=" .. tostring(GetBaseCylinderRadius()) .. "\n"
+   g_debug_message_count = 0
+
+   if g_debug_console_only then
+      print("Create Tapered Rounding Toolpath debug start")
+      print("debug_enabled=" .. tostring(g_debug))
+      print("version=" .. tostring(g_version))
+      print("toolpath_name=" .. tostring(g_toolpath_name))
+      print("toolpath_type=" .. tostring(g_toolpath_type))
+      print("cylinder_length=" .. tostring(g_cylinder_length))
+      print("cylinder_diameter=" .. tostring(g_cylinder_diameter))
+      print("start_diameter=" .. tostring(g_start_diameter))
+      print("end_diameter=" .. tostring(g_end_diameter))
+      print("allowance=" .. tostring(g_allowance))
+      print("offset_from_start=" .. tostring(g_offset_from_start))
+      print("offset_from_end=" .. tostring(g_offset_from_end))
+      print("base_radius=" .. tostring(GetBaseCylinderRadius()))
+      if g_debug then
+         print("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y")
+      end
+      return
+   end
+
+   local output_ok = pcall(function()
+      io.output(g_debug_path)
+   end)
+
+   if not output_ok then
+      if g_debug then
+         DisplayMessageBox("DEBUG enabled but could not write " .. g_debug_path)
+      end
+      return
+   end
+   g_debug_file = io.output()
+
+   g_debug_file:write("Create Tapered Rounding Toolpath debug start\n")
+   g_debug_file:write("debug_enabled=" .. tostring(g_debug) .. "\n")
+   g_debug_file:write("version=" .. tostring(g_version) .. "\n")
+   g_debug_file:write("toolpath_name=" .. tostring(g_toolpath_name) .. "\n")
+   g_debug_file:write("toolpath_type=" .. tostring(g_toolpath_type) .. "\n")
+   g_debug_file:write("cylinder_length=" .. tostring(g_cylinder_length) .. "\n")
+   g_debug_file:write("cylinder_diameter=" .. tostring(g_cylinder_diameter) .. "\n")
+   g_debug_file:write("start_diameter=" .. tostring(g_start_diameter) .. "\n")
+   g_debug_file:write("end_diameter=" .. tostring(g_end_diameter) .. "\n")
+   g_debug_file:write("allowance=" .. tostring(g_allowance) .. "\n")
+   g_debug_file:write("offset_from_start=" .. tostring(g_offset_from_start) .. "\n")
+   g_debug_file:write("offset_from_end=" .. tostring(g_offset_from_end) .. "\n")
+   g_debug_file:write("base_radius=" .. tostring(GetBaseCylinderRadius()) .. "\n")
+   if g_debug then
+      g_debug_file:write("event,pass_index,segment_index,axis_distance,cross_distance,taper_radius,pass_offset,outer_radius,z_value,machine_radius,x,y\n")
+   end
+end
+
+function DebugClose()
+   if g_debug_console_only then
+      print("Create Tapered Rounding Toolpath debug end")
+      if g_debug then
+         DisplayMessageBox(g_debug_message .. "Create Tapered Rounding Toolpath debug end")
+      end
+      return
+   end
+
+   if g_debug_file ~= nil then
+      g_debug_file:write("Create Tapered Rounding Toolpath debug end\n")
+      g_debug_file:close()
+      g_debug_file = nil
+      if g_debug then
+         DisplayMessageBox("DEBUG wrote " .. g_debug_path)
+      end
+   end
+end
+
+function DebugWritePoint(event_name, pass_index, segment_index, axis_distance, cross_distance, pass_offset, outer_radius, z_value, point)
+   if not g_debug then
+      return
+   end
+
+   local x_value = ""
+   local y_value = ""
+   if point ~= nil then
+      x_value = tostring(point.x)
+      y_value = tostring(point.y)
+   end
+
+   local debug_line =
+      tostring(event_name) .. "," ..
+      tostring(pass_index) .. "," ..
+      tostring(segment_index) .. "," ..
+      tostring(axis_distance) .. "," ..
+      tostring(cross_distance) .. "," ..
+      tostring(GetTaperRadiusAtAxis(axis_distance)) .. "," ..
+      tostring(pass_offset) .. "," ..
+      tostring(outer_radius) .. "," ..
+      tostring(z_value) .. "," ..
+      tostring(GetBaseCylinderRadius() + z_value) .. "," ..
+      x_value .. "," ..
+      y_value
+
+   if g_debug_console_only then
+      print(debug_line)
+      if g_debug_message_count < g_debug_message_limit then
+         g_debug_message = g_debug_message .. debug_line .. "\n"
+         g_debug_message_count = g_debug_message_count + 1
+      end
+      return
+   end
+
+   if g_debug_file == nil then
+      return
+   end
+
+   g_debug_file:write(debug_line .. "\n")
+end
+
 function GetEffectiveCylinderLength()
    local length = g_cylinder_length - g_offset_from_start - g_offset_from_end
    if length < 0.0 then
@@ -1021,6 +1154,8 @@ function GetCutZAtAxis(axis_distance, pass_offset, max_radius)
       target_radius = max_radius
    end
 
+   -- Match Create Rounding Toolpath: vector Z is radial stock relative to
+   -- the wrapped cylinder radius, not absolute radius from the rotary axis.
    return target_radius - GetBaseCylinderRadius()
 end
 
@@ -1132,6 +1267,9 @@ function CreateTaperedRasterLevelContour(raster_along_axis, pass_offset, stepove
       local start_z = GetCutZAtAxis(start_axis, pass_offset, outer_radius)
       local end_point = AxisCrossToPoint(end_axis, end_cross)
       local end_z = GetCutZAtAxis(end_axis, pass_offset, outer_radius)
+
+      DebugWritePoint("raster-start", pass_offset, n, start_axis, start_cross, pass_offset, outer_radius, start_z, start_point)
+      DebugWritePoint("raster-end", pass_offset, n, end_axis, end_cross, pass_offset, outer_radius, end_z, end_point)
 
       if first_point then
          contour:SetZHeight(start_z)
@@ -1269,6 +1407,8 @@ function AddTaperedSpiralContours(spiral_group, effective_length, turns, segment
          local z_value = GetCutZAtAxis(axis_distance, pass_offsets[pass_index], outer_radius)
          local point = AxisCrossToPoint(axis_distance, cross_distance)
 
+         DebugWritePoint("spiral", pass_index, segment_index, axis_distance, cross_distance, pass_offsets[pass_index], outer_radius, z_value, point)
+
          if segment_index == 0 then
             contour:SetZHeight(z_value)
             contour:AppendPoint(point)
@@ -1385,6 +1525,8 @@ function main(script_path)
 
    -- Create the selected toolpath. Straight cylinders use the original
    -- Create Rounding Toolpath implementation for radial/raster/optimized.
+   DebugOpen()
+
    if g_toolpath_type == 4 then
       CreateTaperedSpiralToolpath(job)
    elseif g_toolpath_type == 1 then
@@ -1408,6 +1550,8 @@ function main(script_path)
    else
       DisplayMessageBox("Currently unsupported toolpath type chosen")
    end
+
+   DebugClose()
 
    -- Make sure job shows any data we may have drawn
    job:Refresh2DView()
